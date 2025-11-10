@@ -1,15 +1,6 @@
 import uvicorn
 import sys
 
-# Configuration
-OLLAMA = "http://ollama:11434"
-LOG_DIR = "/logs"
-QDRANT_HOST = "qdrant"
-QDRANT_PORT = 6333
-ENCODER = "bge-m3:567m-fp16"
-ENCODER_WINDOW = 8192
-LLM = "mistral-nemo:12b-instruct-2407-q8_0"
-
 def main():
     host = "127.0.0.1"
     port = 8000

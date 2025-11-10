@@ -7,8 +7,11 @@ import os
 from datetime import datetime
 import uuid
 from typing import Dict, Any, Optional, Union
-from .__main__ import OLLAMA, LOG_DIR
-from .MyAgent import MyAgent
+from .Agent import Agent
+import yaml
+
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
 # Configure logging
 logging.basicConfig(
@@ -23,9 +26,6 @@ logger = logging.getLogger("ollama-agent")
 
 # Initialize FastAPI application
 app = FastAPI(title="Ollama Agent Proxy")
-
-# Ensure log directory exists
-os.makedirs(LOG_DIR, exist_ok=True)
 
 # Initialize HTTP client with infinite timeout for streaming responses
 http_client = httpx.AsyncClient(timeout=None)
@@ -96,7 +96,7 @@ async def log_transaction(
     
     # Create filename based on request_id and direction
     filename = f"{request_id}_{direction}.json"
-    filepath = os.path.join(LOG_DIR, filename)
+    filepath = os.path.join(config["logs"]["path"], filename)
     
     # Write log to file
     with open(filepath, "w") as f:
@@ -116,7 +116,7 @@ async def proxy_endpoint(request: Request, path: str):
     """
     request_id = generate_request_id()
     method = request.method
-    url = f"{OLLAMA}/{path}"
+    url = config["ollama"]["url"]
     
     # Get request headers and body
     headers = dict(request.headers)

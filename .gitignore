@@ -1,12 +1,1 @@
-services/jupyter/notebook/.ipynb_checkpoints/*
-services/jupyter/notebook/models/*
-services/nginx/ssl/*
-services/jupyter/notebook/data/*
-services/webui/*
-services/ollama/*
-services/qdrant/*
-services/agent/logs/*
-*.pdf
-*.PDF
-*.pyc
 .env
