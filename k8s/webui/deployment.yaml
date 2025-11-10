@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webui
+  labels:
+    app: webui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webui
+  template:
+    metadata:
+      labels:
+        app: webui
+    spec:
+      containers:
+        - name: webui
+          image: ghcr.io/open-webui/open-webui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: all-secrets
+                  key: KEYCLOAK_DB_PASSWORD
+

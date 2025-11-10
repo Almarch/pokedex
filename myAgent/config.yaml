@@ -1,8 +1,8 @@
 ollama:
   url: "http://ollama:11434"
   encoder: 
-    model: "bge-m3:567m-fp16"
-    window: 8192
+    model: "embeddinggemma:300m"
+    window: 768
   llm:
     model: "mistral-nemo:12b-instruct-2407-q4_0"
 

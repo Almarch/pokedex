@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notebook-pv
+  labels:
+    app: notebook
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/k3s/notebook
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notebook-pvc
+  labels:
+    app: notebook
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 10Gi

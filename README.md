@@ -2,7 +2,7 @@
 
 The goal of this package is to provide an AI assistant to the world of Pokémon.
 
-It consists in a stack of services, listed in the `docker-compose.yml` file.
+It consists in a stack of services orchestrated by k3s.
 
 In a nutshell, it encompasses an UI and an inference service. A custom agentic proxy intercepts the requests between these services, processes them, and eventually augments them with information from a vector DB.
 
@@ -21,7 +21,7 @@ This project can also be seen as a natural language processing exercice with rel
 
 To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
-## ⏬ Clone locally
+## 🚀 Launch the project
 
 Start by cloning the repo:
 
@@ -30,53 +30,110 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-## 🔐 Secure
-
-The project uses [nginx](https://github.com/nginx/nginx) as a reverse proxy.
-
-Server-client transactions are encrypted using SSL keys. For more security, use a domain name and a CA certificate.
-
-Generate the SSL keys:
+The project is designed to run with a k3s, a light distribution of kubernetes:
 
 ```sh
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout services/nginx/ssl/ssl.key -out services/nginx/ssl/ssl.crt -subj "/CN=localhost"
+# install brew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+brew install kubectl k9s helm
+
+# install & start k3s
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--docker --disable traefik" sh -
+
+# all users have all rights on k3s
+sudo chmod 644 /etc/rancher/k3s/k3s.yaml
 ```
 
-Also, the UI service requires a secret key:
+To load kubectl, k9s & helm:
+
+```sh
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
+Generate all secrets:
 
 ```sh
 echo "WEBUI_SECRET_KEY=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)" > .env
+
+kubectl create secret generic all-secrets \
+  --from-env-file=.env \
+  --dry-run=client -o yaml > k8s/secrets.yaml
+
+kubectl apply -f k8s/secrets.yaml
 ```
 
-## 🚀 Launch
-
-The project is containerized with [docker](https://github.com/docker).
-
-Pull, build & launch all services with compose :
+Install ingress & cert-manager
 
 ```sh
-docker compose pull
-docker compose build
-docker compose up -d
-docker ps
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --create-namespace \
+  --set controller.kind=DaemonSet \
+  --set controller.hostNetwork=true \
+  --set controller.hostPort.enabled=true \
+  --set controller.dnsPolicy=ClusterFirstWithHostNet \
+  --set controller.service.type=ClusterIP
+
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true
 ```
 
-## 🦙 Pull the models
-
-[Ollama](https://github.com/ollama/ollama) is included in the stack.
-
-It requires 2 models:
-- a LLM. By default, [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is selected.
-- an encoder. By default, [BGE-M3](https://huggingface.co/BAAI/bge-m3) is selected.
-
-If you change the models, adjust `services/myAgent/myAgent/__main__.py` accordingly.
-
-Pull the models from the Ollama container. If Ollama runs on container `123`:
+Build the init-job images:
 
 ```sh
-docker exec -it 123 bash
-ollama pull mistral-nemo:12b-instruct-2407-q8_0
-ollama pull bge-m3:567m-fp16
+docker build -t poke-agent:latest -f dockerfile.agent .
+docker build -t poke-notebook:latest -f dockerfile.notebook .
+```
+
+Mount the log & notebook volumes:
+
+```sh
+sudo mkdir -p /mnt/k3s/logs
+sudo mkdir -p /mnt/k3s/notebook
+sudo mount --bind "$(pwd)/logs" /mnt/k3s/logs
+sudo mount --bind "$(pwd)/notebook" /mnt/k3s/notebook
+```
+
+K3s use docker latest images automatically.
+Load and deploy all services:
+
+```sh
+kubectl apply -R -f k8s/
+```
+
+Check the installation status:
+
+```sh
+k9s
+```
+
+Get the service IP's and volumes:
+
+```sh
+kubectl get svc
+kubectl get pvc
+```
+
+Pull the VPS models:
+
+```sh
+kubectl get pods
+```
+
+From an Ollama pod:
+
+```sh
+kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
+kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
 ```
 
 ## 🧩 Fill the Vector DB
@@ -98,7 +155,7 @@ Reach https://localhost:8080 and parameterize the interface. Deactivate the enco
 This framework can readily adapt to other agentic projects.
 
 - The data base should be filled with relevant collections.
-- The custom agentic logics is centralised in `services/agent/MyAgent/MyAgent/MyAgent.py`.
+- The custom agentic logics is centralised in `myAgent/myAgent/Agent.py`.
 
 ## 🕳️ Tunneling
 
