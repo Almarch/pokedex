@@ -26,4 +26,6 @@ spec:
                 secretKeyRef:
                   name: all-secrets
                   key: KEYCLOAK_DB_PASSWORD
+            - name: OLLAMA_BASE_URL
+              value: http://agent:8000
 

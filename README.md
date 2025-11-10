@@ -21,6 +21,26 @@ This project can also be seen as a natural language processing exercice with rel
 
 To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
+Docker daemon (`/etc/docker/daemon.json`) must be parameterized as:
+
+```json
+{
+  "default-runtime": "nvidia",
+  "runtimes": {
+    "nvidia": {
+      "path": "nvidia-container-runtime",
+      "runtimeArgs": []
+    }
+  }
+}
+```
+
+Restart docker if needed:
+
+```sh
+sudo systemctl restart docker
+```
+
 ## 🚀 Launch the project
 
 Start by cloning the repo:
@@ -30,7 +50,7 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-The project is designed to run with a k3s, a light distribution of kubernetes:
+The project is designed to run with a k3s, a light distribution of kubernetes.
 
 ```sh
 # install brew
@@ -46,6 +66,12 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--docker --disable traefik" sh 
 # all users have all rights on k3s
 sudo chmod 644 /etc/rancher/k3s/k3s.yaml
 ```
+
+<!-- Desinstall & reinstall it all:
+```sh
+sudo /usr/local/bin/k3s-uninstall.sh
+sudo rm -rf /var/lib/rancher /var/lib/kubelet
+```-->
 
 To load kubectl, k9s & helm:
 
@@ -65,11 +91,12 @@ kubectl create secret generic all-secrets \
 kubectl apply -f k8s/secrets.yaml
 ```
 
-Install ingress & cert-manager
+Install ingress, cert-manager and nvidia plugin:
 
 ```sh
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add jetstack https://charts.jetstack.io
+helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm repo update
 
 helm install ingress-nginx ingress-nginx/ingress-nginx \
@@ -85,6 +112,10 @@ helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
   --set crds.enabled=true
+
+helm install nvidia-device-plugin nvdp/nvidia-device-plugin \
+  --namespace kube-system \
+  --create-namespace
 ```
 
 Build the init-job images:
