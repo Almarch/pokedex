@@ -12,12 +12,7 @@ The project has been set-up such as French <img src="https://upload.wikimedia.or
 
 ![Picture1](https://github.com/user-attachments/assets/d3b2aea5-9b25-4bcd-9c53-92093d1b450a)
 
-This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. The specs it has been built with are:
-
-- a linux/amd64 platform ;
-- git and docker ;
-- 32 Go RAM ;
-- a Nvidia GPU (12 Go VRAM) with cuda.
+This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a Linux server.
 
 To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
@@ -61,10 +56,11 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 brew install kubectl k9s helm
 
 # install & start k3s
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--docker --disable traefik" sh -
-
-# all users have all rights on k3s
-sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+curl -sfL https://get.k3s.io | \
+  K3S_KUBECONFIG_MODE=644 \
+  INSTALL_K3S_EXEC="--docker \
+  --disable traefik" \
+  sh -
 ```
 
 <!-- Desinstall & reinstall it all:
