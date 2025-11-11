@@ -9,9 +9,7 @@ import uuid
 from typing import Dict, Any, Optional, Union
 from .Agent import Agent
 import yaml
-
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+from .config import config
 
 # Configure logging
 logging.basicConfig(

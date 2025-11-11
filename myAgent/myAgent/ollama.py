@@ -1,7 +1,5 @@
-import yaml, requests
-
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+import requests
+from .config import config
 
 def generate(
     prompt,

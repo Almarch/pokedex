@@ -1,7 +1,5 @@
 import yaml
 from qdrant_client import QdrantClient
-
-with open("config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+from .config import config
 
 qdrant = QdrantClient(url = config["qdrant"]["url"])
