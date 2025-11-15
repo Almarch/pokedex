@@ -5,7 +5,7 @@ metadata:
   labels:
     app: notebook
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: ollama
   ports:
