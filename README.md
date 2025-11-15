@@ -16,26 +16,6 @@ This project can also be seen as a natural language processing exercice with rel
 
 To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
-Docker daemon (`/etc/docker/daemon.json`) must be parameterized as:
-
-```json
-{
-  "default-runtime": "nvidia",
-  "runtimes": {
-    "nvidia": {
-      "path": "nvidia-container-runtime",
-      "runtimeArgs": []
-    }
-  }
-}
-```
-
-Restart docker if needed:
-
-```sh
-sudo systemctl restart docker
-```
-
 ## 🚀 Launch the project
 
 Start by cloning the repo:
@@ -58,8 +38,7 @@ brew install kubectl k9s helm
 # install & start k3s
 curl -sfL https://get.k3s.io | \
   K3S_KUBECONFIG_MODE=644 \
-  INSTALL_K3S_EXEC="--docker \
-  --disable traefik" \
+  INSTALL_K3S_EXEC="--disable traefik" \
   sh -
 ```
 
@@ -87,12 +66,11 @@ kubectl create secret generic all-secrets \
 kubectl apply -f k8s/secrets.yaml
 ```
 
-Install ingress, cert-manager and nvidia plugin:
+Install ingress and cert-manager:
 
 ```sh
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo add jetstack https://charts.jetstack.io
-helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
 helm repo update
 
 helm install ingress-nginx ingress-nginx/ingress-nginx \
@@ -108,17 +86,30 @@ helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
   --set crds.enabled=true
-
-helm install nvidia-device-plugin nvdp/nvidia-device-plugin \
-  --namespace kube-system \
-  --create-namespace
 ```
 
-Build the init-job images:
+Then set-up the nvidia plugin:
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.5/nvidia-device-plugin.yml
+
+kubectl patch daemonset -n kube-system nvidia-device-plugin-daemonset \
+  --type merge \
+  -p '{"spec":{"template":{"spec":{"runtimeClassName":"nvidia"}}}}'
+
+kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
+
+kubectl describe node | grep -i nvidia
+```
+
+Build the init-job images and provide them to k3s:
 
 ```sh
 docker build -t poke-agent:latest -f dockerfile.agent .
 docker build -t poke-notebook:latest -f dockerfile.notebook .
+
+docker save poke-agent:latest | sudo k3s ctr images import -
+docker save poke-notebook:latest | sudo k3s ctr images import -
 ```
 
 Mount the log & notebook volumes:
