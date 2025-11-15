@@ -7,7 +7,7 @@ def generate(
     temperature = 0,
 ):
     response = requests.post(
-        urljoin(config["ollama"]["url"], "/api/generate"),
+        config["ollama"]["url"] + "/api/generate",
         json = {
             "model": config["ollama"]["llm"]["model"],
             "prompt": prompt,
@@ -22,9 +22,9 @@ def embed(
     prompt,
 ):
     response = requests.post(
-        OLLAMA + "/api/embeddings",
+        config["ollama"]["url"] + "/api/embeddings",
         json = {
-            "model": ENCODER,
+            "model": config["ollama"]["encoder"]["model"],
             "prompt": prompt,
         }
     )

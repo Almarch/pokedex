@@ -3,11 +3,11 @@ kind: Ingress
 metadata:
   name: webui
   annotations:
-    spec.ingressClassName: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/hsts: "true"
 spec:
+  ingressClassName: nginx
   tls:
     - secretName: webui-tls
   rules:

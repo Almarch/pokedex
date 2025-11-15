@@ -1,15 +1,12 @@
-import json
-import re
-from .qdrant import qdrant
 from .sorry import sorry
 from .format_rag import format_rag
-from .embed import embed
+from .is_about_pokemon import is_about_pokemon
 from .summarize import summarize
+from .get_rag import get_rag
 
 class Agent():
     def __init__(self, body):
         self.body = body
-        self.qdrant = qdrant
 
     def set_instructions(self, instructions):
         system_message = {
@@ -23,14 +20,7 @@ class Agent():
         if is_about_pokemon(self.body["messages"]):
 
             query = summarize(self.body["messages"])
-            query = embed(query)
-
-            rag = self.qdrant.query_points(
-                collection_name="pokemons",
-                query = query,
-                limit = 5
-            )
-            rag = str([rag.points[i].payload for i in range(len(rag.points))])
+            rag = get_rag(query)
             instructions = format_rag(rag)
 
         else :

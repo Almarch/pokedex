@@ -27,5 +27,5 @@ spec:
                   name: all-secrets
                   key: WEBUI_SECRET_KEY
             - name: OLLAMA_BASE_URL
-              value: http://agent:8080
+              value: http://agent:7000
 

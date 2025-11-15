@@ -1,23 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app
+  name: notebook
   labels:
-    app: app
+    app: notebook
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app
+      app: notebook
   template:
     metadata:
       labels:
-        app: app
+        app: notebook
     spec:
       containers:
-        - name: app
+        - name: notebook
           image: poke-notebook:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 80
+            - containerPort: 8888
+              hostPort: 8888
+          volumeMounts:
+            - name: notebook-storage
+              mountPath: /notebook
+      volumes:
+        - name: notebook-storage
+          persistentVolumeClaim:
+            claimName: notebook-pvc
 

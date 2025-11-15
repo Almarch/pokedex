@@ -1,4 +1,5 @@
 from .ollama import typed_gen
+from pydantic import BaseModel
 
 class Format(BaseModel):
     output: bool

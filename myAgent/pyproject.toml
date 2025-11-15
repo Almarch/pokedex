@@ -17,5 +17,7 @@ dependencies = [
     "python-multipart",
     "requests",
     "qdrant_client",
+    "PyYAML",
+    "pydantic",
 ]
 

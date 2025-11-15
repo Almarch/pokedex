@@ -8,5 +8,5 @@ COPY ./myAgent /app/myAgent
 
 RUN pip install --no-cache-dir /app/myAgent
 
-EXPOSE 8080
-CMD ["python", "-m", "myAgent", "0.0.0.0", "8080"]
+EXPOSE 7000
+CMD ["python", "-m", "myAgent", "0.0.0.0", "7000"]

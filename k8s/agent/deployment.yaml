@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent
+  labels:
+    app: agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+  template:
+    metadata:
+      labels:
+        app: agent
+    spec:
+      containers:
+        - name: agent
+          image: poke-agent:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 7000
+              hostPort: 7000
+          volumeMounts:
+            - name: agent-storage
+              mountPath: /logs
+      volumes:
+        - name: agent-storage
+          persistentVolumeClaim:
+            claimName: agent-pvc
+

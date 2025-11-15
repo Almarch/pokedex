@@ -134,14 +134,7 @@ Check the installation status:
 k9s
 ```
 
-Get the service IP's and volumes:
-
-```sh
-kubectl get svc
-kubectl get pvc
-```
-
-Pull the VPS models:
+Pull the models:
 
 ```sh
 kubectl get pods
