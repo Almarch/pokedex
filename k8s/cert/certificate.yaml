@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: webui-cert
+  namespace: default
+spec:
+  secretName: webui-tls
+  privateKey:
+    rotationPolicy: Always
+  commonName: localhost
+  dnsNames:
+    - localhost
+  issuerRef:
+    name: webui-selfsigned
+    kind: Issuer

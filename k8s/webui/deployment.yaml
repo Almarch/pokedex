@@ -19,7 +19,7 @@ spec:
           image: ghcr.io/open-webui/open-webui:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           env:
             - name: WEBUI_SECRET_KEY
               valueFrom:
@@ -28,4 +28,10 @@ spec:
                   key: WEBUI_SECRET_KEY
             - name: OLLAMA_BASE_URL
               value: http://agent:7000
-
+          volumeMounts:
+            - name: webui-data
+              mountPath: /app/backend/data
+      volumes:
+        - name: webui-data
+          persistentVolumeClaim:
+            claimName: webui-pvc

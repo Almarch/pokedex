@@ -8,7 +8,6 @@ from datetime import datetime
 import uuid
 from typing import Dict, Any, Optional, Union
 from .Agent import Agent
-import yaml
 from .config import config
 
 # Configure logging
@@ -142,7 +141,7 @@ async def proxy_endpoint(request: Request, path: str):
                 body=body
             )
 
-            agent = MyAgent(body_dict)
+            agent = Agent(body_dict)
             new_body_dict = agent.process()
             new_body_str = json.dumps(new_body_dict)
             new_body = new_body_str.encode("utf-8")
