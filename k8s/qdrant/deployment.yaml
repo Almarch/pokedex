@@ -20,7 +20,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 6333
-              hostPort: 6333
           volumeMounts:
             - name: qdrant-storage
               mountPath: /qdrant/storage

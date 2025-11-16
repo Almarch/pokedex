@@ -20,7 +20,6 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 8888
-              hostPort: 8888
           volumeMounts:
             - name: notebook-storage
               mountPath: /notebook

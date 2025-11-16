@@ -134,6 +134,24 @@ Check the installation status:
 k9s
 ```
 
+## 🚢 expose the services to localhost
+
+The services need to be exposed to localhost either for local use, either to tunnel them to a VPS. For instance, to expose both the notebook, ollama and qdrant:
+
+```sh
+screen
+
+trap "kill 0" SIGINT
+kubectl port-forward svc/notebook 8888:8888
+kubectl port-forward svc/ollama 11434:11434
+kubectl port-forward svc/qdrant 6333:6333
+wait
+```
+
+Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
+
+## 🦙 Collect Ollama models
+
 Pull the models:
 
 ```sh
@@ -159,7 +177,7 @@ Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
 [Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
 
-Reach https://localhost:8080 and parameterize the interface. Deactivate the encoder model, and make the LLM accessible to all users. If needed, make accounts to the family & friends you would like to share the app with.
+Reach https://localhost and parameterize the interface. Deactivate the encoder model, and make the LLM accessible to all users. If needed, make accounts to the family & friends you would like to share the app with.
 
 ## 🔀 Adaptation to other projects
 
@@ -189,19 +207,24 @@ The services we need are:
 The ports are pushed to the VPS:
 
 ```sh
-ssh -N -R 8080:localhost:8080 -R 8888:localhost:8888 -R 2222:localhost:22 userB@11.22.33.44
+screen
+
+ssh -N -R 80:localhost:80 -R 8888:localhost:8888 -R 2222:localhost:22 userB@11.22.33.44
 ```
 
+Then Ctrl+A+D to detach the screen.
+
 ### From B) the VPS
-The SSH ports 2222 and 8080 have to be opened.
+The VPS firewall has to be parameterized:
 
 ```sh
 sudo ufw allow 2222
-sudo ufw allow 8080
+sudo ufw allow 443
+sudo ufw allow 80
 sudo ufw reload
 ```
 
-The UI is now available world-wide at https://11.22.33.44:8080.
+The UI is now available world-wide at https://11.22.33.44, using self-signed certificates.
 
 ### From C) the client
 The jupyter notebook is pulled from the VPS:
@@ -219,26 +242,6 @@ ssh -p 2222 userA@11.22.33.44
 ```
 
 Note that `userA`, not `userB`, is required for authentication ; idem for the password.
-
-<!-- 
-
-### To go further: forward the Ollama service to use in another, distant docker cluster
-
-Say the Pokedex' Ollama service listens at local port 1234. From the server:
-
-```
-ssh -N -R 1234:localhost:1234 userB@11.22.33.44
-```
-
-From the client:
-
-```
-ssh -N -L 0.0.0.0:1234:localhost:1234 userB@11.22.33.44
-```
-
-Using 0.0.0.0 makes the forwarded port available from another docker cluster at the address: `http://host.docker.internal:1234`
-
--->
 
 ## ⚖️ License
 

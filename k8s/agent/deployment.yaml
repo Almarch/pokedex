@@ -20,7 +20,6 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 7000
-              hostPort: 7000
           volumeMounts:
             - name: agent-storage
               mountPath: /logs
