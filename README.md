@@ -208,7 +208,7 @@ Name|A  |B  |C  |
 ---|---|---|---
 Description|GPU server  |VPS  |Client  |
 Role|Host the services  |Host the tunnel  |Use the Pokédex  | 
-User|userA  |userB  | doesn't matter   | 
+User|userA  |root  | doesn't matter   | 
 IP|doesn't matter  |11.22.33.44  | doesn't matter  | 
 
 The services we need are:
@@ -216,12 +216,27 @@ The services we need are:
 - A SSH endpoint. Port 22 of the gaming machine (A) will be exposed through port 2222 of the VPS (B).
 
 ### From A) the gaming machine
-The ports are pushed to the VPS:
+
+The VPS must allow gateway ports. In `/etc/ssh/sshd_config`:
+
+```config
+AllowTcpForwarding yes
+GatewayPorts yes
+PermitRootLogin yes
+```
+
+To access ports 80 and 443, userB must be = root. Otherwise, use different ports. If no root user exists, from the VPS:
+
+```sh
+sudo passwd root
+```
+
+The ports are then pushed to the VPS from the GPU server:
 
 ```sh
 screen
 
-ssh -N -R 80:localhost:80 -R 8888:localhost:8888 -R 2222:localhost:22 userB@11.22.33.44
+sudo ssh -N -R 80:localhost:80 -R 443:localhost:443 -R 8888:localhost:8888 -R 2222:localhost:22 root@11.22.33.44
 ```
 
 Then Ctrl+A+D to detach the screen.
@@ -242,7 +257,7 @@ The UI is now available world-wide at https://11.22.33.44, using self-signed cer
 The jupyter notebook is pulled from the VPS:
 
 ```sh
-ssh -N -L 8888:localhost:8888 userB@11.22.33.44
+ssh -N -L 8888:localhost:8888 root@11.22.33.44
 ```
 
 The notebook is now available for the client at https://localhost:8888.
@@ -252,8 +267,6 @@ And the VPS is a direct tunnel to the gaming machine A:
 ```sh
 ssh -p 2222 userA@11.22.33.44
 ```
-
-Note that `userA`, not `userB`, is required for authentication ; idem for the password.
 
 ## ⚖️ License
 
