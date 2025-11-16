@@ -113,7 +113,8 @@ async def proxy_endpoint(request: Request, path: str):
     """
     request_id = generate_request_id()
     method = request.method
-    url = config["ollama"]["url"]
+    ollama = config["ollama"]["url"]
+    url = f"{ollama}/{path}"
     
     # Get request headers and body
     headers = dict(request.headers)

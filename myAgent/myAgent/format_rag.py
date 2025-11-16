@@ -1,7 +1,6 @@
 from .intro import intro
 
 def format_rag(
-    self,
     rag,
 ):
     prompt = intro() + f"""

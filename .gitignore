@@ -1,4 +1,4 @@
 .env
 k8s/secrets.yaml
 *-checkpoint.*
-logs/agent.log
+logs/*

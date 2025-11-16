@@ -5,7 +5,6 @@ class Format(BaseModel):
     output: bool
 
 def is_about_pokemon(
-    self,
     conversation,
 ):
     prompt = f"""
