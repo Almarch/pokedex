@@ -173,6 +173,8 @@ It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebo
 
 Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
+![PCA](notebook/pca.png)
+
 ## 🎮 Access the WebUI
 
 [Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
