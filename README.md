@@ -146,11 +146,17 @@ The services need to be exposed to localhost either for local use, either to tun
 screen
 
 trap "kill 0" SIGINT
-kubectl port-forward svc/notebook 8888:8888
-kubectl port-forward svc/ollama 11434:11434
-kubectl port-forward svc/qdrant 6333:6333
+kubectl port-forward svc/notebook 8888:8888 &
+kubectl port-forward svc/ollama 11434:11434 &
+kubectl port-forward svc/qdrant 6333:6333 &
 wait
 ```
+
+<!-- kill all port forward
+```sh
+pkill -f "kubectl port-forward"
+```-->
+
 
 Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
 
