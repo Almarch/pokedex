@@ -1,4 +1,5 @@
 # <img src="https://github.com/user-attachments/assets/bfe58e17-99f6-4ad7-af1a-ce25b21cbc6a" alt="PoKéDeX" width="50"/> Pokédex: AI assistant to a world of dreams and adventures
+<img width="300" align="right" alt="pokedex" src="https://github.com/user-attachments/assets/e82bf2f9-559e-459f-86ec-394022fbd346" />
 
 The goal of this package is to provide an AI assistant to the world of Pokémon.
 
@@ -173,7 +174,7 @@ It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebo
 
 Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
-![PCA](notebook/pca.png)
+<img src="notebook/pca.png" width="1000" alt="PCA">
 
 ## 🎮 Access the WebUI
 
