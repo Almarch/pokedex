@@ -226,7 +226,13 @@ GatewayPorts yes
 PermitRootLogin yes
 ```
 
-To access ports 80 and 443, userB must be = root. Otherwise, use different ports. If no root user exists, from the VPS:
+Then:
+
+```sh
+sudo systemctl restart ssh
+```
+
+To access ports 80 and 443, the VPS user must be root. If no root user exists, from the VPS:
 
 ```sh
 sudo passwd root
@@ -240,9 +246,8 @@ screen
 sudo ssh -N -R 80:localhost:80 -R 443:localhost:443 -R 8888:localhost:8888 -R 2222:localhost:22 root@11.22.33.44
 ```
 
-Then Ctrl+A+D to detach the screen.
-
 ### From B) the VPS
+
 The VPS firewall has to be parameterized:
 
 ```sh
@@ -255,6 +260,7 @@ sudo ufw reload
 The UI is now available world-wide at https://11.22.33.44, using self-signed certificates.
 
 ### From C) the client
+
 The jupyter notebook is pulled from the VPS:
 
 ```sh
