@@ -214,7 +214,7 @@ IP|doesn't matter  |11.22.33.44  | doesn't matter  |
 The services we need are:
 - The web UI, available at ports 80/443. This port will be exposed on the web.
 - The notebook, available at port 8888. This port will remain available for private use only.
-- A SSH endpoint. Port 22 of the gaming machine (A) will be exposed through port 2222 of the VPS (B). This port will be reserves for SSH tunneling to the GPU server.
+- A SSH endpoint. Port 22 of the gaming machine (A) will be exposed through port 2222 of the VPS (B).
 
 ### From A) the gaming machine
 
