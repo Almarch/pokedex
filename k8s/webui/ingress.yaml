@@ -9,16 +9,14 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-    - hosts: ["localhost"]
-      secretName: webui-tls
+  - secretName: webui-tls
   rules:
-    - host: localhost
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: webui
-                port:
-                  number: 80
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webui
+            port:
+              number: 80
