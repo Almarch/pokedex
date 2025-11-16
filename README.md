@@ -41,6 +41,9 @@ curl -sfL https://get.k3s.io | \
   K3S_KUBECONFIG_MODE=644 \
   INSTALL_K3S_EXEC="--disable traefik" \
   sh -
+
+sudo systemctl stop k3s
+sudo systemctl start k3s
 ```
 
 <!-- Desinstall & reinstall it all:
