@@ -3,7 +3,7 @@
 
 The goal of this package is to provide an AI assistant to the world of Pokémon.
 
-It consists in a stack of services orchestrated by k3s.
+It consists in a stack of services orchestrated by Kubernetes.
 
 In a nutshell, it encompasses an UI and an inference service. A custom agentic proxy intercepts the requests between these services, processes them, and eventually augments them with information from a vector DB.
 
@@ -13,7 +13,7 @@ The project has been set-up such as French <img src="https://upload.wikimedia.or
 
 ![Picture1](https://github.com/user-attachments/assets/d3b2aea5-9b25-4bcd-9c53-92093d1b450a)
 
-This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a Linux server.
+This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a GNU/Linux server.
 
 To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
@@ -26,7 +26,7 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-The project is designed to run with a k3s, a light distribution of kubernetes.
+The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes.
 
 ```sh
 # install brew
@@ -157,7 +157,6 @@ wait
 pkill -f "kubectl port-forward"
 ```-->
 
-
 Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
 
 ## 🦙 Collect Ollama models
@@ -185,6 +184,8 @@ Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
 <img src="notebook/pca.png" width="1000" alt="PCA">
 
+On this figure, we can observe how the Pokémons have been ordered on a 2D plane from the embedding space.
+
 ## 🎮 Access the WebUI
 
 [Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
@@ -193,7 +194,7 @@ Reach https://localhost and parameterize the interface. Deactivate the encoder m
 
 ## 🔀 Adaptation to other projects
 
-This framework can readily adapt to other agentic projects.
+This framework can readily adapt to other RAG/agentic projects.
 
 - The data base should be filled with relevant collections.
 - The custom agentic logics is centralised in `myAgent/myAgent/Agent.py`.
