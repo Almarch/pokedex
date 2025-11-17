@@ -162,13 +162,13 @@ Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-for
 
 ## 🦙 Collect Ollama models
 
-Pull the models:
+An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
 
 ```sh
 kubectl get pods
 ```
 
-From an Ollama pod:
+Pull the models from an Ollama pod:
 
 ```sh
 kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
