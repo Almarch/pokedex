@@ -106,7 +106,7 @@ kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
 kubectl describe node | grep -i nvidia
 ```
 
-Build the init-job images and provide them to k3s:
+Build the custom images and provide them to k3s:
 
 ```sh
 docker build -t poke-agent:latest -f dockerfile.agent .
