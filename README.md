@@ -9,7 +9,7 @@ In a nutshell, it encompasses an UI and an inference service. A custom agentic p
 
 The models have been selected with respect to their minimalism, performance and multilingualism.
 
-The project has been set-up such as French <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Flag_of_France.svg" alt="fr" width="20"/> is the privileged language of the AI assistant.
+The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant will answer in the appropriate language but also use the corresponding translation of the Pokémon name.
 
 ![Picture1](https://github.com/user-attachments/assets/d3b2aea5-9b25-4bcd-9c53-92093d1b450a)
 

@@ -23,6 +23,7 @@ spec:
           volumeMounts:
             - name: notebook-storage
               mountPath: /notebook
+              mountPropagation: HostToContainer
       volumes:
         - name: notebook-storage
           persistentVolumeClaim:

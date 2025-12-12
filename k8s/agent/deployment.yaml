@@ -23,6 +23,7 @@ spec:
           volumeMounts:
             - name: agent-storage
               mountPath: /logs
+              mountPropagation: HostToContainer
       volumes:
         - name: agent-storage
           persistentVolumeClaim:
