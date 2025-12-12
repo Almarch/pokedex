@@ -9,9 +9,13 @@ In a nutshell, it encompasses an UI and an inference service. A custom agentic p
 
 The models have been selected with respect to their minimalism, performance and multilingualism.
 
-The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant will answer in the appropriate language but also use the corresponding translation of the Pokémon name.
+The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon name.
 
-![Picture1](https://github.com/user-attachments/assets/d3b2aea5-9b25-4bcd-9c53-92093d1b450a)
+<br>
+<div align="center">
+<img width="900" alt="Illustration" src="https://github.com/user-attachments/assets/44947d80-fe17-46c2-b064-514eb24ef8f1" />
+</div>
+<br>
 
 This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a GNU/Linux server.
 
@@ -174,6 +178,8 @@ kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
 kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
 ```
 
+[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on 12 Go VRAM. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
+
 ## 🧩 Fill the Vector DB
 
 A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
@@ -182,9 +188,13 @@ It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebo
 
 Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
-<img src="notebook/pca.png" width="1000" alt="PCA">
+<br>
+<div align="center">
+<img src="notebook/pca.png" width="800" alt="PCA">
+</div>
+<br>
 
-On this figure, we can observe how the Pokémons have been ordered on a 2D plane from the embedding space.
+On this figure, we can have a glance at how a few of the Pokémon records have been ordered on a 2D plane from the embedding space of the French collection.
 
 ## 🎮 Access the WebUI
 
