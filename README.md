@@ -1,15 +1,15 @@
 # <img src="https://github.com/user-attachments/assets/bfe58e17-99f6-4ad7-af1a-ce25b21cbc6a" alt="PoKéDeX" width="50"/> Pokédex: AI assistant to a world of dreams and adventures
 <img width="350" align="right" alt="pokedex" src="https://github.com/user-attachments/assets/e82bf2f9-559e-459f-86ec-394022fbd346" />
 
-The goal of this package is to provide an AI assistant to the world of Pokémon.
+The goal of this application is to provide an AI assistant to the world of Pokémon.
 
-It consists in a stack of services orchestrated by Kubernetes.
-
-In a nutshell, it encompasses an UI and an inference service. A custom agentic proxy intercepts the requests between these services, processes them, and augments them with information from a vector DB.
-
-The models have been selected with respect to their minimalism, performance and multilingualism.
+It consists in a stack of services orchestrated by Kubernetes. In a nutshell, it encompasses an UI and an inference service. A middleware intercepts the requests between these services, processes them, and augments them with information from a vector DB.
 
 The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
+
+## 📱 Utilization
+
+Interact with the assistant directly from the web UI:
 
 <br>
 <div align="center">
@@ -17,7 +17,16 @@ The project has been set-up such as English and French are the two supported lan
 </div>
 <br>
 
-This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a GNU/Linux server.
+As examplified, the app covers 2 use cases:
+
+- Identify Pokémons from given features.
+- Get the features of Pokémons given their name.
+
+## 📋 Specifications
+
+The application requires a Nvidia GPU and it is designed for a GNU/Linux server. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
+
+It has been succesfully run on 12Go VRAM + 32Go RAM. With more constrained resources, consider using a lighter LLM.
 
 ## 🚀 Launch the project
 
@@ -27,8 +36,6 @@ Start by cloning the repo:
 git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
-
-The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) for the containers to access the GPU.
 
 The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes.
 
@@ -178,7 +185,7 @@ kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
 kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
 ```
 
-[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on 12 Go VRAM. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
+[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on a limited GPU resource. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
 
 ## 🧩 Fill the Vector DB
 
@@ -186,7 +193,7 @@ A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
 
 It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebook) service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
 
-Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
+The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
 <br>
 <div align="center">
@@ -200,14 +207,16 @@ On this figure, we can have a glance at how a few of the Pokémon records have b
 
 [Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
 
-Reach https://localhost and parameterize the interface. Deactivate the encoder model, and make the LLM accessible to all users. If needed, make accounts to the family & friends you would like to share the app with.
+Reach https://localhost and parameterize the interface. Deactivate the user access to the encoder model, and make the LLM accessible to all users.
+
+If needed, set up accounts to the family & friends you would like to share the app with.
 
 ## 🔀 Adaptation to other projects
 
 This framework can readily adapt to other RAG/agentic projects.
 
 - The data base should be filled with relevant collections.
-- The custom agentic logics is centralised in `myAgent/myAgent/Agent.py`.
+- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
 
 ## 🕳️ Tunneling
 
