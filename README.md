@@ -5,11 +5,11 @@ The goal of this package is to provide an AI assistant to the world of Pokémon.
 
 It consists in a stack of services orchestrated by Kubernetes.
 
-In a nutshell, it encompasses an UI and an inference service. A custom agentic proxy intercepts the requests between these services, processes them, and eventually augments them with information from a vector DB.
+In a nutshell, it encompasses an UI and an inference service. A custom agentic proxy intercepts the requests between these services, processes them, and augments them with information from a vector DB.
 
 The models have been selected with respect to their minimalism, performance and multilingualism.
 
-The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon name.
+The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
 
 <br>
 <div align="center">
@@ -19,8 +19,6 @@ The project has been set-up such as English and French are the two supported lan
 
 This project can also be seen as a natural language processing exercice with relatively limited resources, _i.e._ a gaming computer. It requires a Nvidia GPU and it is designed for a GNU/Linux server.
 
-To make use of the later, the [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
-
 ## 🚀 Launch the project
 
 Start by cloning the repo:
@@ -29,6 +27,8 @@ Start by cloning the repo:
 git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
+
+The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) for the containers to access the GPU.
 
 The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes.
 
