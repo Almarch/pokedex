@@ -217,6 +217,8 @@ This framework can readily adapt to other RAG/agentic projects.
 
 - The data base should be filled with relevant collections.
 - The custom logic is centralised in `myAgent/myAgent/Agent.py`.
+ 
+<!--
 
 ## 🕳️ Tunneling
 
@@ -294,6 +296,8 @@ And the VPS is a direct tunnel to the gaming machine A:
 ```sh
 ssh -p 2222 userA@11.22.33.44
 ```
+
+-->
 
 ## ⚖️ License
 
