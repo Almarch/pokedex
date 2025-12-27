@@ -117,6 +117,71 @@ kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
 kubectl describe node | grep -i nvidia
 ```
 
+<details><summary>🪟 WSL specificities</summary>
+
+To install the NVIDIA container toolkit:
+
+```sh
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+sed "s/\$(ARCH)/$(dpkg --print-architecture)/g" | \
+sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+```
+
+In `C:/Users/myUser`, create: `.wslconfig` with:
+
+```conf
+[wsl2]
+kernelCommandLine = cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1
+```
+
+Then, from the WSL, in `/etc/wsl.conf`:
+
+```conf
+[boot]
+systemd=true
+command="/etc/startup.sh"
+```
+
+And in `/etc/startup.sh`:
+
+```sh
+#!/bin/bash
+mount --make-rshared /
+
+if [ ! -e /dev/nvidia0 ]; then
+    mkdir -p /dev/nvidia-uvm
+    mknod -m 666 /dev/nvidia0 c 195 0
+    mknod -m 666 /dev/nvidiactl c 195 255
+    mknod -m 666 /dev/nvidia-modeset c 195 254
+    mknod -m 666 /dev/nvidia-uvm c 510 0
+    mknod -m 666 /dev/nvidia-uvm-tools c 510 1
+fi
+```
+
+Make it executable:
+
+```sh
+sudo chmod +x /etc/startup.sh
+```
+
+Restart the WSL. From PowerShell:
+
+```sh
+wsl --shutdown
+bash
+sudo systemctl restart k3s
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
+Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-deploy-wsl2.yaml`.
+
+</details>
+
 Build the custom images and provide them to k3s:
 
 ```sh
@@ -211,16 +276,7 @@ Reach https://localhost and parameterize the interface. Deactivate the user acce
 
 If needed, set up accounts to the family & friends you would like to share the app with.
 
-## 🔀 Adaptation to other projects
-
-This framework can readily adapt to other RAG/agentic projects.
-
-- The data base should be filled with relevant collections.
-- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
- 
-<!--
-
-## 🕳️ Tunneling
+<details><summary>🕳️ Tunneling</summary>
 
 <img src="https://github.com/user-attachments/assets/86197798-9039-484b-9874-85f529fba932" width="100px" align="right"/>
 
@@ -297,7 +353,14 @@ And the VPS is a direct tunnel to the gaming machine A:
 ssh -p 2222 userA@11.22.33.44
 ```
 
--->
+</details>
+
+## 🔀 Adaptation to other projects
+
+This framework can readily adapt to other RAG/agentic projects.
+
+- The data base should be filled with relevant collections.
+- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
 
 ## ⚖️ License
 
