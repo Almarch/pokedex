@@ -5,7 +5,7 @@ from .ollama import embed
 def vector_search(query, language, n=10):
     query = embed(query)
     rag = qdrant.query_points(
-        collection_name= f"pokemon_{language}",
+        collection_name= f"description_{language}",
         query = query,
         limit = n
     )
@@ -14,7 +14,7 @@ def vector_search(query, language, n=10):
 
 def name_search(names, language):
     rag, _ = qdrant.scroll(
-        collection_name=f"pokemon_{language}",
+        collection_name=f"description_{language}",
         scroll_filter=Filter(
             should=[
                 FieldCondition(
