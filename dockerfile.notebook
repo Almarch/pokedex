@@ -1,24 +1,17 @@
-FROM jupyter/base-notebook:latest
+FROM python:3.12-slim
 
-USER root
+RUN pip install --upgrade pip==25.3.0
 
 # Python dependencies
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir build
 COPY ./requirements.notebook .
 RUN pip install --no-cache-dir -r requirements.notebook
 
-COPY ./myAgent /myAgent
-RUN pip install --no-cache-dir /myAgent
-
-USER jovyan
-
-# disable security (this is intended for local use)
-RUN echo "c.NotebookApp.token = ''" >> /etc/jupyter/jupyter_notebook_config.py
+COPY ./agent /agent
+RUN pip install --no-cache-dir /agent
 
 # access project (shared volume)
 WORKDIR /notebook
 
 # expose & launch
 EXPOSE 8888
-CMD ["start-notebook.sh"]
+CMD ["jupyter", "lab", "--no-browser", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--ServerApp.token=", "--ServerApp.password="]

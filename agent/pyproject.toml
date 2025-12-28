@@ -1,18 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
+packages = ["agent"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-myAgent = ["config.yaml"]
+agent = ["config.yaml"]
 
 [project]
-name = "myAgent"
+name = "agent"
 version = "0.0.0"
+description = "Agentic logic service"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi",
     "uvicorn",
-    "asyncio",
     "httpx",
     "python-multipart",
     "requests",
@@ -20,4 +24,3 @@ dependencies = [
     "PyYAML",
     "pydantic",
 ]
-

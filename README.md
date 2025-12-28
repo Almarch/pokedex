@@ -187,9 +187,11 @@ Build the custom images and provide them to k3s:
 ```sh
 docker build -t poke-agent:latest -f dockerfile.agent .
 docker build -t poke-notebook:latest -f dockerfile.notebook .
+docker build -t poke-encoding:latest -f dockerfile.encoding .
 
 docker save poke-agent:latest | sudo k3s ctr images import -
 docker save poke-notebook:latest | sudo k3s ctr images import -
+docker save poke-encoding:latest | sudo k3s ctr images import -
 ```
 
 Mount the log & notebook volumes:
@@ -247,7 +249,6 @@ Pull the models from an Ollama pod:
 
 ```sh
 kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
-kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
 ```
 
 [Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on a limited GPU resource. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.

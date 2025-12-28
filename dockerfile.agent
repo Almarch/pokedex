@@ -1,12 +1,11 @@
-FROM python:latest
+FROM python:3.12-slim
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir build
+RUN pip install --upgrade pip==25.3.0
 
 WORKDIR /app
-COPY ./myAgent /app/myAgent
+COPY ./agent /app/agent
 
-RUN pip install --no-cache-dir /app/myAgent
+RUN pip install --no-cache-dir /app/agent
 
 EXPOSE 7000
-CMD ["python", "-m", "myAgent", "0.0.0.0", "7000"]
+CMD ["python", "-m", "agent", "0.0.0.0", "7000"]

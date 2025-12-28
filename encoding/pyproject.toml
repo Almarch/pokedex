@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["encoding"]
+include-package-data = true
+
+[project]
+name = "encoding"
+version = "0.0.0"
+description = "Encoding service"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "transformers",
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "pydantic",
+]

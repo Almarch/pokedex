@@ -18,20 +18,6 @@ def generate(
     )
     return response.json()["response"]
 
-def embed(
-    prompt,
-):
-    response = requests.post(
-        config["ollama"]["url"] + "/api/embeddings",
-        json = {
-            "model": config["ollama"]["encoder"]["model"],
-            "prompt": prompt,
-        }
-    )
-    return response.json()["embedding"]
-
-encoder_window = config["ollama"]["encoder"]["window"]
-
 def typed_gen(prompt, format):
     res = generate(
             prompt = prompt,

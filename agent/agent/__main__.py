@@ -14,7 +14,7 @@ def main():
             print("Error: Port must be an integer.")
             sys.exit(1)
 
-    uvicorn.run("myAgent.app:app", host=host, port=port, reload=False)
+    uvicorn.run("agent.app:app", host=host, port=port, reload=False)
 
 if __name__ == "__main__":
     main()

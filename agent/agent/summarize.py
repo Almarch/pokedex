@@ -1,4 +1,4 @@
-from .ollama import typed_gen, encoder_window
+from .ollama import typed_gen
 from pydantic import BaseModel
 from typing import Literal, List
 
@@ -33,8 +33,8 @@ Task 1: Conversation summary:
 - The summary must capture the main points of the last message.
 - Ther rest of the conversation is there to provide context and to
 better understand the last message.
-- The summary should be at maximum {encoder_window} tokens long.
-- The summary must absolutely be written in the same language as
+- The summary must be at maximum a few sentences long.
+- The summary must be written in the same language as
 the conversation, especially the last message from the user.
 
 Task 2: Simply identify the language of the conversation.
