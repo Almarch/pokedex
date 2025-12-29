@@ -7,8 +7,8 @@ from typing import Literal
 
 # Load the model
 embedder = SentenceTransformer(
-    config["encoder"]["model"],
-    cache_folder="/cache",
+    config["embedding"]["model"],
+    cache_folder=config["cache"],
     trust_remote_code=True
 )
 
@@ -22,14 +22,19 @@ class Input(BaseModel):
 class Output(BaseModel):
     vector: list[float]
 
-@app.post("/embed", response_model=Output)
-
+@app.get("/embed", response_model=Output)
 async def embed(data: Input):
 
-    embedding = embedder.encode(
-        data.prompt,
-        prompt_name = data.type,
-        convert_to_numpy=True
-    )
+    if data.type == "query":
+        embedding = embedder.encode(
+            data.prompt,
+            prompt_name = "query",
+            convert_to_numpy=True
+        )
+    elif data.type == "document":
+        embedding = embedder.encode(
+            data.prompt,
+            convert_to_numpy=True
+        )
     
     return Output(vector=embedding.tolist())

@@ -1,12 +1,13 @@
 import requests
 from .config import config
+from urllib.parse import urljoin
 
 def embed(
     prompt,
     type
 ):
-    response = requests.post(
-        config["encoding"]["url"] + "/encode",
+    response = requests.get(
+        urljoin(config["encoding"]["url"], "embed"),
         json = {
             "prompt": prompt,
             "type": type,

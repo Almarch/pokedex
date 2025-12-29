@@ -3,3 +3,5 @@ embedding:
 
 reranker:
   model: "Qwen/Qwen3-Reranker-0.6B"
+
+cache: "/cache"

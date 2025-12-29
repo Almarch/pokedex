@@ -4,7 +4,7 @@ from typing import Literal, List
 
 class Output(BaseModel):
     summary: str
-    language: Literal["fr", "en", "other"]
+    language: Literal["fr", "de", "es", "it", "en", "other"]
     is_about_pokemon: bool
     mentioned_pokemon: List[str]
 
@@ -39,6 +39,9 @@ the conversation, especially the last message from the user.
 
 Task 2: Simply identify the language of the conversation.
 - "fr" for French
+- "de" for German
+- "es" for Spanish
+- "it" for Italian
 - "en" for English
 - "other" otherwise.
 

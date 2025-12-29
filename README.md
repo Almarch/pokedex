@@ -185,9 +185,9 @@ Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-dep
 Build the custom images and provide them to k3s:
 
 ```sh
-docker build -t poke-agent:latest -f dockerfile.agent .
-docker build -t poke-notebook:latest -f dockerfile.notebook .
-docker build -t poke-encoding:latest -f dockerfile.encoding .
+docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
+docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
+docker build -t poke-encoding:latest -f dockerfiles/dockerfile.encoding .
 
 docker save poke-agent:latest | sudo k3s ctr images import -
 docker save poke-notebook:latest | sudo k3s ctr images import -
@@ -216,48 +216,23 @@ Check the installation status:
 k9s
 ```
 
-## 🚢 expose the services to localhost
+## 🦙 Models collection
 
-The services need to be exposed to localhost either for local use, either to tunnel them to a VPS. For instance, to expose both the notebook, ollama and qdrant:
+All models are automatically pulled when the agent and encoding services instanciates.
 
-```sh
-screen
-
-trap "kill 0" SIGINT
-kubectl port-forward svc/notebook 8888:8888 &
-kubectl port-forward svc/ollama 11434:11434 &
-kubectl port-forward svc/qdrant 6333:6333 &
-wait
-```
-
-<!-- kill all port forward
-```sh
-pkill -f "kubectl port-forward"
-```-->
-
-Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
-
-## 🦙 Collect Ollama models
-
-An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
-
-```sh
-kubectl get pods
-```
-
-Pull the models from an Ollama pod:
-
-```sh
-kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
-```
-
-[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on a limited GPU resource. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
+All models (LLM, embedding, reranker) are from the Qwen family. Qwen models have been selected for their functional and multilingual capabilities.
 
 ## 🧩 Fill the Vector DB
 
 A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
 
 It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebook) service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
+
+To access the notebook, forward the port to localhost:
+
+```sh
+kubectl port-forward svc/notebook 8888:8888
+```
 
 The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 

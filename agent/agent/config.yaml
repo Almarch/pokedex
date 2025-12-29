@@ -1,7 +1,6 @@
 ollama:
   url: "http://ollama:11434"
-  llm:
-    model: "mistral-nemo:12b-instruct-2407-q4_0"
+  model: "qwen2.5:14b-instruct-q4_0"
 
 encoding:
   url: "http://encoding:6999"
