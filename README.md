@@ -340,7 +340,7 @@ ssh -p 2222 userA@11.22.33.44
 This framework can readily adapt to other RAG/agentic projects.
 
 - The data base should be filled with relevant collections.
-- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
+- The custom logic is centralised in `agent/agent/Agent.py`.
 
 ## ⚖️ License
 
