@@ -24,4 +24,5 @@ dependencies = [
     "PyYAML",
     "pydantic",
     "scikit-learn",
+    "regex",
 ]

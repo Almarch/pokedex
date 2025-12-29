@@ -6,7 +6,6 @@ class Output(BaseModel):
     summary: str
     language: Literal["fr", "de", "es", "it", "en", "other"]
     is_about_pokemon: bool
-    mentioned_pokemon: List[str]
 
 class Format(BaseModel):
     output: Output
@@ -27,7 +26,6 @@ You have 4 tasks:
 1. Summarize the last message of the conversation.
 2. Identify the language of the conversation.
 3. Identify if the conversation is about Pokémon.
-4. Identify if specific Pokémons are mentioned.
 
 Task 1: Conversation summary:
 - The summary must capture the main points of the last message.
@@ -50,14 +48,6 @@ Task 3: Identify if the conversation is about Pokémon.
 - If the conversation is not about Pokémon, or if the user
 changed the topic in their last message, set it to false.
 - If unsure, output false.
-
-Task 4: Identify Pokémons mentioned in the last message.
-- Identify if the last message explicitely mention specific Pokémons.
-- The rest of the conversation is there to provide context and to
-better understand the last message. The last message could mention a Pokémon
-specifically named in a previous message.
-- If you have a doubt, consider that weird or uncommon names could be Pokémons.
-- Output them as as a list.
 
 ### INPUT
 

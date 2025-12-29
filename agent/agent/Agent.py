@@ -2,6 +2,7 @@ from .sorry import sorry
 from .format_rag import format_rag
 from .summarize import summarize
 from .rag import name_search, vector_search
+from .pokemon_match import pokemon_match
 
 class Agent():
     def __init__(self, body):
@@ -17,10 +18,16 @@ class Agent():
     def process(self):
 
         out = summarize(self.body["messages"])
-        summary, language, is_about_pokemon, mentioned_pokemons = out.model_dump().values()
+        summary, language, is_about_pokemon = out.model_dump().values()
 
         print("Summary:", summary)
         print("Language:", language)
+
+        conv = "\n".join([msg["content"] for msg in self.body["messages"]])
+        mentioned_pokemons = pokemon_match(conv, language)
+        if len(mentioned_pokemons) > 0:
+            is_about_pokemon = True
+
         print("Is about Pokémon:", is_about_pokemon)
         print("Mentioned Pokémons:", mentioned_pokemons)
 
