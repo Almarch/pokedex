@@ -1,0 +1,18 @@
+FROM python:3.12-slim
+
+RUN pip install --upgrade pip==25.3.0
+
+WORKDIR /app
+COPY ./agent /app/agent
+
+RUN pip install --no-cache-dir /app/agent
+
+# Python dependencies
+COPY ./requirements.notebook .
+RUN pip install --no-cache-dir -r requirements.notebook
+
+WORKDIR /notebook
+
+# expose & launch
+EXPOSE 8888
+CMD ["jupyter", "lab", "--no-browser", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--ServerApp.token=", "--ServerApp.password="]

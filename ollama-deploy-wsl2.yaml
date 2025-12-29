@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      runtimeClassName: nvidia
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 11434
+          securityContext:
+            privileged: true
+          env:
+            - name: LD_LIBRARY_PATH
+              value: "/usr/lib/wsl/lib"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: all
+          volumeMounts:
+            - name: ollama-storage
+              mountPath: /root/.ollama
+            - name: nvidia-dev
+              mountPath: /dev
+            - name: nvidia-libs
+              mountPath: /usr/lib/wsl/lib
+              readOnly: true
+      volumes:
+        - name: ollama-storage
+          persistentVolumeClaim:
+            claimName: ollama-pvc
+        - name: nvidia-dev
+          hostPath:
+            path: /dev
+        - name: nvidia-libs
+          hostPath:
+            path: /usr/lib/wsl/lib

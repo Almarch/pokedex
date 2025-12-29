@@ -117,14 +117,81 @@ kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
 kubectl describe node | grep -i nvidia
 ```
 
+<details><summary>🪟 WSL specificities</summary>
+
+To install the NVIDIA container toolkit:
+
+```sh
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+sed "s/\$(ARCH)/$(dpkg --print-architecture)/g" | \
+sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+```
+
+In `C:/Users/myUser`, create: `.wslconfig` with:
+
+```conf
+[wsl2]
+kernelCommandLine = cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1
+```
+
+Then, from the WSL, in `/etc/wsl.conf`:
+
+```conf
+[boot]
+systemd=true
+command="/etc/startup.sh"
+```
+
+And in `/etc/startup.sh`:
+
+```sh
+#!/bin/bash
+mount --make-rshared /
+
+if [ ! -e /dev/nvidia0 ]; then
+    mkdir -p /dev/nvidia-uvm
+    mknod -m 666 /dev/nvidia0 c 195 0
+    mknod -m 666 /dev/nvidiactl c 195 255
+    mknod -m 666 /dev/nvidia-modeset c 195 254
+    mknod -m 666 /dev/nvidia-uvm c 510 0
+    mknod -m 666 /dev/nvidia-uvm-tools c 510 1
+fi
+```
+
+Make it executable:
+
+```sh
+sudo chmod +x /etc/startup.sh
+```
+
+Restart the WSL. From PowerShell:
+
+```sh
+wsl --shutdown
+bash
+sudo systemctl restart k3s
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
+Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-deploy-wsl2.yaml`.
+
+</details>
+
 Build the custom images and provide them to k3s:
 
 ```sh
-docker build -t poke-agent:latest -f dockerfile.agent .
-docker build -t poke-notebook:latest -f dockerfile.notebook .
+docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
+docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
+docker build -t poke-encoding:latest -f dockerfiles/dockerfile.encoding .
 
 docker save poke-agent:latest | sudo k3s ctr images import -
 docker save poke-notebook:latest | sudo k3s ctr images import -
+docker save poke-encoding:latest | sudo k3s ctr images import -
 ```
 
 Mount the log & notebook volumes:
@@ -149,49 +216,27 @@ Check the installation status:
 k9s
 ```
 
-## 🚢 expose the services to localhost
+## 🦙 Models collection
 
-The services need to be exposed to localhost either for local use, either to tunnel them to a VPS. For instance, to expose both the notebook, ollama and qdrant:
+All models are automatically pulled when the agent and encoding services instanciate.
 
-```sh
-screen
+All models (LLM, embedding, reranker) are from the [Qwen](https://huggingface.co/Qwen) family. Qwen models have been selected for their functional and multilingual capabilities.
 
-trap "kill 0" SIGINT
-kubectl port-forward svc/notebook 8888:8888 &
-kubectl port-forward svc/ollama 11434:11434 &
-kubectl port-forward svc/qdrant 6333:6333 &
-wait
-```
+An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack. It accesses the GPU and hosts the LLM.
 
-<!-- kill all port forward
-```sh
-pkill -f "kubectl port-forward"
-```-->
-
-Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
-
-## 🦙 Collect Ollama models
-
-An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
-
-```sh
-kubectl get pods
-```
-
-Pull the models from an Ollama pod:
-
-```sh
-kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
-kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
-```
-
-[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on a limited GPU resource. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
+A custom service manages all encoding tasks.
 
 ## 🧩 Fill the Vector DB
 
 A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
 
 It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebook) service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
+
+To access the notebook, forward the port to localhost:
+
+```sh
+kubectl port-forward svc/notebook 8888:8888
+```
 
 The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
@@ -211,16 +256,7 @@ Reach https://localhost and parameterize the interface. Deactivate the user acce
 
 If needed, set up accounts to the family & friends you would like to share the app with.
 
-## 🔀 Adaptation to other projects
-
-This framework can readily adapt to other RAG/agentic projects.
-
-- The data base should be filled with relevant collections.
-- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
- 
-<!--
-
-## 🕳️ Tunneling
+<details><summary>🕳️ Tunneling</summary>
 
 <img src="https://github.com/user-attachments/assets/86197798-9039-484b-9874-85f529fba932" width="100px" align="right"/>
 
@@ -297,7 +333,14 @@ And the VPS is a direct tunnel to the gaming machine A:
 ssh -p 2222 userA@11.22.33.44
 ```
 
--->
+</details>
+
+## 🔀 Adaptation to other projects
+
+This framework can readily adapt to other RAG/agentic projects.
+
+- The data base should be filled with relevant collections.
+- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
 
 ## ⚖️ License
 

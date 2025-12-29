@@ -1,0 +1,7 @@
+embedding:
+  model: "Qwen/Qwen3-Embedding-0.6B"
+
+reranker:
+  model: "Qwen/Qwen3-Reranker-0.6B"
+
+cache: "/cache"

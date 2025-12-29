@@ -1,10 +1,10 @@
-from .ollama import typed_gen, encoder_window
+from .ollama import typed_gen
 from pydantic import BaseModel
 from typing import Literal, List
 
 class Output(BaseModel):
     summary: str
-    language: Literal["fr", "en", "other"]
+    language: Literal["fr", "de", "es", "it", "en", "other"]
     is_about_pokemon: bool
     mentioned_pokemon: List[str]
 
@@ -33,12 +33,15 @@ Task 1: Conversation summary:
 - The summary must capture the main points of the last message.
 - Ther rest of the conversation is there to provide context and to
 better understand the last message.
-- The summary should be at maximum {encoder_window} tokens long.
-- The summary must absolutely be written in the same language as
+- The summary must be at maximum a few sentences long.
+- The summary must be written in the same language as
 the conversation, especially the last message from the user.
 
 Task 2: Simply identify the language of the conversation.
 - "fr" for French
+- "de" for German
+- "es" for Spanish
+- "it" for Italian
 - "en" for English
 - "other" otherwise.
 
