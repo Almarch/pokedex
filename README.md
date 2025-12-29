@@ -218,9 +218,13 @@ k9s
 
 ## 🦙 Models collection
 
-All models are automatically pulled when the agent and encoding services instanciates.
+All models are automatically pulled when the agent and encoding services instanciate.
 
-All models (LLM, embedding, reranker) are from the Qwen family. Qwen models have been selected for their functional and multilingual capabilities.
+All models (LLM, embedding, reranker) are from the [Qwen](https://huggingface.co/Qwen) family. Qwen models have been selected for their functional and multilingual capabilities.
+
+An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack. It accesses the GPU and hosts the LLM.
+
+A custom service manages all encoding tasks.
 
 ## 🧩 Fill the Vector DB
 
