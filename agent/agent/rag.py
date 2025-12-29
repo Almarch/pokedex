@@ -1,9 +1,9 @@
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from .qdrant import qdrant
-from .encoding import embed
+from .encoding import embed, rerank
 
-def vector_search(query, language, n=10):
-    query = embed(query, type = "query")
+def vector_search(query, language, n=20):
+    query = embed([query], type = "query")[0]
     rag = qdrant.query_points(
         collection_name= f"description_{language}",
         query = query,
@@ -29,3 +29,17 @@ def name_search(names, language):
     )
     rag = [point.payload for point in rag]
     return rag
+
+def pokemon_synthese(data, language):
+    templates = {
+        "en": "{name} is a {type}. {description}",
+        "fr": "{name} est un {type}. {description}",
+        "es": "{name} es un {type}. {description}",
+        "it": "{name} è un {type}. {description}",
+        "de": "{name} ist ein {type}. {description}"
+    }
+    
+    template = templates.get(language, templates["en"])
+    return template.format(**data)
+
+

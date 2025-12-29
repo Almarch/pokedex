@@ -216,7 +216,11 @@ Check the installation status:
 k9s
 ```
 
-## 🦙 Models collection
+<!--
+watch -n 0.5 -c gpustat --color -cpu
+-->
+
+## 🦙 Model collection
 
 All models are automatically pulled when the agent and encoding services instanciate.
 

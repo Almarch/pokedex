@@ -6,7 +6,7 @@ def format_rag(
     rag = str(rag)
     prompt = intro() + f"""
 Some information has been retrieved to help you build the most
-appropriate answer. Use this information but do not mention to the
+appropriate answer. Use this information but do not mention it to the
 user: they don't need to know where does your knowledge come from.
 
 Do not rely on your prior knowledge about Pokémons.

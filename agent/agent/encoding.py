@@ -3,16 +3,19 @@ from .config import config
 from urllib.parse import urljoin
 
 def embed(
-    prompt,
+    texts,
     type
 ):
-    response = requests.get(
+    response = requests.post(
         urljoin(config["encoding"]["url"], "embed"),
         json = {
-            "prompt": prompt,
+            "texts": texts,
             "type": type,
         }
     )
-    return response.json()["vector"]
+    return response.json()["embeddings"]
+
+def rerank():
+    pass
 
 

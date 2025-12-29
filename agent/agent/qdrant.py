@@ -22,7 +22,7 @@ def fill(
     qdrant.create_collection(
         collection_name = collection_descriptions,
         vectors_config=models.VectorParams(
-            size= len(embed("lorem ipsum", type = "document")),
+            size= len(embed(["lorem ipsum"], type = "document")[0]),
             distance=models.Distance.COSINE
         )
     )
@@ -43,7 +43,7 @@ def fill(
         flavor_list = [x.replace("\r", "").replace("\n", " ") for x in flavor_list]
         
         # embeddings
-        vector_list = [embed(x, type = "document") for x in flavor_list]
+        vector_list = embed(flavor_list, type = "document")
         
         # remove redundant descriptions
         if len(vector_list) == 0:

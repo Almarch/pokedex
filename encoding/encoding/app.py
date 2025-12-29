@@ -1,40 +1,51 @@
 # app.py
 from fastapi import FastAPI
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
-from .config import config
 from typing import Literal
-
-# Load the model
-embedder = SentenceTransformer(
-    config["embedding"]["model"],
-    cache_folder=config["cache"],
-    trust_remote_code=True
-)
+from .embedder import embedder
+from .reranker import format_instruction, process_inputs, compute_logits
 
 # Initialiser FastAPI
 app = FastAPI(title="Encoding Service", version="0.0.0")
 
-class Input(BaseModel):
-    prompt: str
+class Input_embed(BaseModel):
+    texts: list[str]
     type: Literal["query", "document"]
 
-class Output(BaseModel):
-    vector: list[float]
+class Output_embed(BaseModel):
+    embeddings: list[list[float]]
 
-@app.get("/embed", response_model=Output)
-async def embed(data: Input):
-
+@app.post("/embed", response_model=Output_embed)
+async def embed(data: Input_embed, batch_size: int = 8):
+    
     if data.type == "query":
-        embedding = embedder.encode(
-            data.prompt,
+        embeddings = embedder.encode(
+            data.texts,
             prompt_name = "query",
-            convert_to_numpy=True
+            convert_to_numpy=True,
+            batch_size=batch_size
         )
     elif data.type == "document":
-        embedding = embedder.encode(
-            data.prompt,
-            convert_to_numpy=True
+        embeddings = embedder.encode(
+            data.texts,
+            convert_to_numpy=True,
+            batch_size=batch_size
         )
     
-    return Output(vector=embedding.tolist())
+    return Output_embed(embeddings=embeddings.tolist())
+
+class Input_rerank(BaseModel):
+    query: str
+    documents: list[str]
+
+class Output_rerank(BaseModel):
+    scores: list[float]
+
+@app.post("/rerank", response_model=Output_rerank)
+async def rank(data: Input_rerank):
+
+    pairs = [format_instruction(data.query, doc) for doc in data.documents]
+    inputs = process_inputs(pairs)
+    scores = compute_logits(inputs)
+    
+    return Output_rerank(scores=scores)
