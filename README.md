@@ -178,7 +178,7 @@ sudo systemctl restart k3s
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 ```
 
-Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-deploy-wsl2.yaml`.
+Finally, change `./k8s/inference/deployment.yaml` with the content of `./inference-deploy-wsl2.yaml`.
 
 </details>
 
@@ -187,11 +187,11 @@ Build the custom images and provide them to k3s:
 ```sh
 docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
 docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
-docker build -t poke-encoding:latest -f dockerfiles/dockerfile.encoding .
+docker build -t poke-inference:latest -f dockerfiles/dockerfile.inference .
 
 docker save poke-agent:latest | sudo k3s ctr images import -
 docker save poke-notebook:latest | sudo k3s ctr images import -
-docker save poke-encoding:latest | sudo k3s ctr images import -
+docker save poke-inference:latest | sudo k3s ctr images import -
 ```
 
 Mount the log & notebook volumes:

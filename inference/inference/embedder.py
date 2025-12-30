@@ -4,5 +4,6 @@ from .config import config
 embedder = SentenceTransformer(
     config["embedding"]["model"],
     cache_folder=config["cache"],
-    trust_remote_code=True
+    trust_remote_code=True,
+    device='cuda',
 )

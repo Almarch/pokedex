@@ -3,16 +3,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["encoding"]
+packages = ["inference"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-encoding = ["config.yaml"]
+inference = ["config.yaml"]
 
 [project]
-name = "encoding"
+name = "inference"
 version = "0.0.0"
-description = "Encoding service"
+description = "Inference service"
 requires-python = ">=3.10"
 dependencies = [
     "torch",
@@ -24,4 +24,5 @@ dependencies = [
     "PyYAML",
     "pydantic",
     "accelerate",
+    "vllm",
 ]

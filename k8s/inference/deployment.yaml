@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference
+  labels:
+    app: inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inference
+  template:
+    metadata:
+      labels:
+        app: inference
+    spec:
+      runtimeClassName: nvidia
+      containers:
+        - name: inference
+          image: poke-inference:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 6999
+          securityContext:
+            privileged: true
+          env:
+            - name: LD_LIBRARY_PATH
+              value: "/usr/lib/wsl/lib"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: all
+          volumeMounts:
+            - name: inference-storage
+              mountPath: /cache
+              mountPropagation: HostToContainer
+            - name: nvidia-dev
+              mountPath: /dev
+            - name: nvidia-libs
+              mountPath: /usr/lib/wsl/lib
+              readOnly: true
+      volumes:
+        - name: inference-storage
+          persistentVolumeClaim:
+            claimName: inference-pvc
+        - name: nvidia-dev
+          hostPath:
+            path: /dev
+        - name: nvidia-libs
+          hostPath:
+            path: /usr/lib/wsl/lib

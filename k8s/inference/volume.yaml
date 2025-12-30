@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: encoding-pvc
+  name: inference-pvc
   labels:
-    app: encoding
+    app: inference
 spec:
   accessModes:
     - ReadWriteOnce

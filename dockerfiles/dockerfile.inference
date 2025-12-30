@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 RUN pip install --upgrade pip==25.3.0
 
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip install torch --index-url https://download.pytorch.org/whl/cu121
 
 WORKDIR /app
 COPY ./encoding /app/encoding

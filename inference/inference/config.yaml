@@ -1,0 +1,9 @@
+embedding:
+  model: "Qwen/Qwen3-Embedding-0.6B"
+
+llm:
+  model: "mistralai/Mistral-Nemo-Instruct-2407"
+
+cache: "/cache"
+
+

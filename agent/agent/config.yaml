@@ -1,9 +1,5 @@
-ollama:
-  url: "http://ollama:11434"
-  model: "qwen2.5:14b-instruct-q4_0"
-
-encoding:
-  url: "http://encoding:6999"
+inference:
+  url: "http://inference:6999"
 
 qdrant:
   url: "http://qdrant:6333"

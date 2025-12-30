@@ -9,10 +9,6 @@ import uuid
 from typing import Dict, Any, Optional, Union
 from .Agent import Agent
 from .config import config
-from .ollama import pull
-
-# pull the model
-pull()
 
 # Configure logging
 logging.basicConfig(

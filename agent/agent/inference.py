@@ -2,28 +2,15 @@ import requests
 from .config import config
 from urllib.parse import urljoin
 
-def pull():
-    response = requests.post(
-        urljoin(config["ollama"]["url"], "api/pull"),
-        json= {
-            "name": config["ollama"]["model"]
-        },
-        stream=True
-    )
-
-    for line in response.iter_lines():
-        if line:
-            print(line.decode('utf-8'))
-
 def generate(
     prompt,
     format = None,
     temperature = 0,
 ):
     response = requests.post(
-        urljoin(config["ollama"]["url"], "api/generate"),
+        urljoin(config["inference"]["url"], "api/generate"),
         json = {
-            "model": config["ollama"]["model"],
+            "model": "lorem ipsum",
             "prompt": prompt,
             "format": format,
             "stream": False,
@@ -39,4 +26,20 @@ def typed_gen(prompt, format):
         )
 
     return format.model_validate_json(res).output
+
+def embed(
+    texts,
+    type
+):
+    response = requests.post(
+        urljoin(config["inference"]["url"], "api/embed"),
+        json = {
+            "texts": texts,
+            "type": type,
+        }
+    )
+    return response.json()["embeddings"]
+
+def rerank():
+    pass
 

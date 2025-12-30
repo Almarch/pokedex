@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama
+  name: inference
   labels:
-    app: ollama
+    app: inference
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ollama
+      app: inference
   template:
     metadata:
       labels:
-        app: ollama
+        app: inference
     spec:
       runtimeClassName: nvidia
       containers:
-        - name: ollama
-          image: ollama/ollama:latest
-          imagePullPolicy: IfNotPresent
+        - name: inference
+          image: poke-inference:latest
+          imagePullPolicy: Never
           ports:
-            - containerPort: 11434
+            - containerPort: 6999
           securityContext:
             privileged: true
           env:
@@ -31,17 +31,18 @@ spec:
             - name: NVIDIA_DRIVER_CAPABILITIES
               value: all
           volumeMounts:
-            - name: ollama-storage
-              mountPath: /root/.ollama
+            - name: inference-storage
+              mountPath: /cache
+              mountPropagation: HostToContainer
             - name: nvidia-dev
               mountPath: /dev
             - name: nvidia-libs
               mountPath: /usr/lib/wsl/lib
               readOnly: true
       volumes:
-        - name: ollama-storage
+        - name: inference-storage
           persistentVolumeClaim:
-            claimName: ollama-pvc
+            claimName: inference-pvc
         - name: nvidia-dev
           hostPath:
             path: /dev
