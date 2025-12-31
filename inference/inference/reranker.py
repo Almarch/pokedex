@@ -47,13 +47,19 @@ def compute_logits(prompts: list[str]) -> list[float]:
             first_token_logprobs.get(token_no_id, float('-inf'))
         ])
         probs = np.exp(logprobs)
+
+        # prob_i = exp(z_i) / sum(exp(z))
+        # prob_yes / (prob_yes + prob_no)
+        #     = [exp(z_yes) / sum(exp(z))] / [exp(z_yes) / sum(exp(z))] + exp(z_no) / sum(exp(z))]]
+        #     = exp(z_yes) / [exp(z_yes) + exp(z_no)]]
+        
         score = probs[0] / np.sum(probs)
         scores.append(float(score))
     
     return scores
 
 def rerank(data) -> np.ndarray:
-    
+
     all_prompts = [format_instruction(data.query, doc) for doc in data.documents]
     all_scores = []
 

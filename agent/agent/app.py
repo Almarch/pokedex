@@ -16,7 +16,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(urljoin(config["inference"]["url"], "agent.log")),
+        logging.FileHandler(urljoin(config["logs"]["path"], "agent.log")),
         logging.StreamHandler()
     ]
 )
