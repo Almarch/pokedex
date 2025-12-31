@@ -15,10 +15,12 @@ from .llm import (
 app = FastAPI(title="Inference service", version="0.0.0")
 
 class Input_embed(BaseModel):
-    texts: list[str]
+    model: str = ""
+    input: str | list[str]
     type: Literal["query", "document"] = "document"
 
 class Output_embed(BaseModel):
+    model: str
     embeddings: list[list[float]]
 
 class Input_generate(BaseInputGen):
@@ -37,7 +39,10 @@ class Output_chat(BaseOutputGen):
 @app.post("/api/embed", response_model=Output_embed)
 async def embed_api(data: Input_embed):
     embeddings = embed(data)
-    return Output_embed(embeddings=embeddings.tolist())
+    return Output_embed(
+        model=data.model,
+        embeddings=embeddings.tolist()
+    )
 
 @app.post("/api/generate")
 async def generate_api(data: Input_generate):

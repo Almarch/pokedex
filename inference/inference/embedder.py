@@ -10,24 +10,26 @@ embedder = SentenceTransformer(
 
 if config["embedding"]["asymmetric"]:
     def embed(data, batch_size: int = config["embedding"]["batch_size"]):
+        texts = [data.input] if isinstance(data.input, str) else data.input
         if data.type == "query":
             embeddings = embedder.encode(
-                data.texts,
+                texts,
                 prompt_name = "query",
                 convert_to_numpy=True,
                 batch_size=batch_size
             )
         else:
             embeddings = embedder.encode(
-                data.texts,
+                texts,
                 convert_to_numpy=True,
                 batch_size=batch_size
             )
         return embeddings
 else:
     def embed(data, batch_size: int = config["embedding"]["batch_size"]):
+        texts = [data.input] if isinstance(data.input, str) else data.input
         embeddings = embedder.encode(
-            data.texts,
+            texts,
             convert_to_numpy=True,
             batch_size=batch_size
         )

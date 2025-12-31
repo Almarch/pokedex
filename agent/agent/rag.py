@@ -3,7 +3,7 @@ from .qdrant import qdrant
 from .inference import embed, rerank
 
 def vector_search(query, language, n=20):
-    query = embed([query], type = "query")[0]
+    query = embed(query, type = "query")[0]
     rag = qdrant.query_points(
         collection_name= f"description_{language}",
         query = query,
