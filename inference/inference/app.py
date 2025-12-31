@@ -12,8 +12,7 @@ from .llm import (
     BaseInputGen, BaseOutputGen, Message
 )
 
-# Initialiser FastAPI
-app = FastAPI(title="Encoding Service", version="0.0.0")
+app = FastAPI(title="Inference service", version="0.0.0")
 
 class Input_embed(BaseModel):
     texts: list[str]
