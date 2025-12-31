@@ -1,6 +1,6 @@
 from qdrant_client import QdrantClient
 from .config import config
-from .encoding import embed
+from .inference import embed
 from sklearn.metrics.pairwise import cosine_similarity
 from qdrant_client.http import models
 import uuid

@@ -1,6 +1,6 @@
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from .qdrant import qdrant
-from .encoding import embed, rerank
+from .inference import embed, rerank
 
 def vector_search(query, language, n=20):
     query = embed([query], type = "query")[0]

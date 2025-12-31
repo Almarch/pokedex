@@ -1,8 +1,15 @@
 embedding:
   model: "Qwen/Qwen3-Embedding-0.6B"
+  asymmetric: true
+  batch_size: 16
 
 llm:
   model: "mistralai/Mistral-Nemo-Instruct-2407"
+  quantization: "awq"
+  temperature: 0.35
+  max_tokens: 256
+  top_p: 0.9
+  top_k: 50
 
 cache: "/cache"
 

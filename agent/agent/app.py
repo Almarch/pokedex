@@ -9,13 +9,14 @@ import uuid
 from typing import Dict, Any, Optional, Union
 from .Agent import Agent
 from .config import config
+from urllib.parse import urljoin
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("/logs/agent.log"),
+        logging.FileHandler(urljoin(config["inference"]["url"], "agent.log")),
         logging.StreamHandler()
     ]
 )
@@ -113,7 +114,7 @@ async def proxy_endpoint(request: Request, path: str):
     """
     request_id = generate_request_id()
     method = request.method
-    ollama = config["ollama"]["url"]
+    ollama = config["inference"]["url"]
     url = f"{ollama}/{path}"
     
     # Get request headers and body

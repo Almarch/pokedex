@@ -10,7 +10,7 @@ def generate(
     response = requests.post(
         urljoin(config["inference"]["url"], "api/generate"),
         json = {
-            "model": "lorem ipsum",
+            "model": "",
             "prompt": prompt,
             "format": format,
             "stream": False,
