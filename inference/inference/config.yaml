@@ -1,8 +1,3 @@
-embedding:
-  model: "Qwen/Qwen3-Embedding-0.6B"
-  asymmetric: true
-  batch_size: 16
-
 llm:
   model: "mistralai/Mistral-Nemo-Instruct-2407"
   quantization: "awq"
@@ -11,6 +6,14 @@ llm:
   top_p: 0.9
   top_k: 50
 
+reranking:
+  batch_size: 4
+
+embedding:
+  model: "Qwen/Qwen3-Embedding-0.6B"
+  asymmetric: true
+  batch_size: 16
+  
 cache: "/cache"
 
 

@@ -3,12 +3,12 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Literal
 from datetime import datetime, timezone
-import time
 from .embedder import embedder, embed
+from .reranker import rerank
 from .llm import (
-    llm, tokenizer,
+    llm, tokenizer, generate,
     stream_generate, stream_chat,
-    parameterize_sampling,
+    parameterize_sampling, model,
     BaseInputGen, BaseOutputGen, Message
 )
 
@@ -22,6 +22,15 @@ class Input_embed(BaseModel):
 class Output_embed(BaseModel):
     model: str
     embeddings: list[list[float]]
+
+class Input_rerank(BaseModel):
+    model: str = ""
+    query: str
+    docuuments: list[str]
+
+class Output_rerank(BaseModel):
+    model: str
+    scores: list[float]
 
 class Input_generate(BaseInputGen):
     prompt: str
@@ -44,6 +53,14 @@ async def embed_api(data: Input_embed):
         embeddings=embeddings.tolist()
     )
 
+@app.post("/api/rerank", response_model=Output_rerank)
+async def rerank_api(data: Input_rerank):
+    scores = rerank(data)
+    return Output_rerank(
+        model=data.model,
+        scores=scores.tolist()
+    )
+
 @app.post("/api/generate")
 async def generate_api(data: Input_generate):
     
@@ -57,17 +74,14 @@ async def generate_api(data: Input_generate):
         )
     
     # Non-streaming mode
-    start_time = time.time()
-    output = llm.generate([data.prompt], sampling_params)[0]
-    generated_text = output.outputs[0].text
-    duration_ns = int((time.time() - start_time) * 1e9)
+    generated_text, duration_ns, eval_count = generate(data.prompt, sampling_params)
     
     return Output_generate(
         model=data.model,
         created_at=datetime.now(timezone.utc).isoformat(),
         response=generated_text,
         done=True,
-        eval_count=len(output.outputs[0].token_ids),
+        eval_count=eval_count,
         total_duration=duration_ns,
     )
 
@@ -84,22 +98,19 @@ async def chat_api(data: Input_chat):
         )
     
     # Non-streaming mode
-    start_time = time.time()
     prompt = tokenizer.apply_chat_template(
         data.messages,
         tokenize=False,
         add_generation_prompt=True
     )
-    output = llm.generate([prompt], sampling_params)[0]
-    generated_text = output.outputs[0].text.strip()
-    duration_ns = int((time.time() - start_time) * 1e9)
+    generated_text, duration_ns, eval_count = generate(prompt, sampling_params)
     
     return Output_chat(
         model=data.model,
         created_at=datetime.now(timezone.utc).isoformat(),
         message=Message(role="assistant", content=generated_text),
         done=True,
-        eval_count=len(output.outputs[0].token_ids),
+        eval_count=eval_count,
         total_duration=duration_ns,
     )
 
@@ -108,8 +119,8 @@ async def tags():
     return {
         "models": [
             {
-                "name": "Pokédex",
-                "modified_at": '2000-01-01T00:00:00+00:00',
+                "name": model,
+                "modified_at": '1996-02-27T00:00:00+00:00',
                 "size": 0,
             }
         ]

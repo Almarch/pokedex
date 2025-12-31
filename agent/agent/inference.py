@@ -22,7 +22,8 @@ def generate(
 def typed_gen(prompt, format):
     res = generate(
             prompt = prompt,
-            format = format.model_json_schema()
+            format = format.model_json_schema(),
+            temperature = 0,
         )
 
     return format.model_validate_json(res).output
@@ -41,6 +42,14 @@ def embed(
     )
     return response.json()["embeddings"]
 
-def rerank():
-    pass
+def rerank(query, documents):
+    response = requests.post(
+        urljoin(config["inference"]["url"], "api/rerank"),
+        json = {
+            "model": "",
+            "query": query,
+            "documents": documents,
+        }
+    )
+    return response.json()["scores"]
 

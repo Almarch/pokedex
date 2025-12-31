@@ -1,13 +1,11 @@
-FROM python:3.12-slim
+FROM vllm/vllm-openai:v0.13.0
 
 RUN pip install --upgrade pip==25.3.0
 
-RUN pip install torch --index-url https://download.pytorch.org/whl/cu121
-
 WORKDIR /app
-COPY ./encoding /app/encoding
+COPY ./inference /app/inference
 
-RUN pip install --no-cache-dir /app/encoding
+RUN pip install --no-cache-dir /app/inference
 
 EXPOSE 6999
-CMD ["python", "-m", "encoding", "0.0.0.0", "6999"]
+CMD ["python", "-m", "inference", "0.0.0.0", "6999"]

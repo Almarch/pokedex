@@ -15,6 +15,8 @@ llm = LLM(
     gpu_memory_utilization=0.9,
 )
 
+model = "Pokédex"
+
 class Message(BaseModel):
     role: Literal["system", "user", "assistant"]
     content: str
@@ -52,6 +54,15 @@ def parameterize_sampling(data):
         
     return sampling_params
 
+async def generate(prompt, sampling_params):
+    start_time = time.time()
+    output = llm.generate([prompt], sampling_params)[0]
+    generated_text = output.outputs[0].text
+    duration_ns = int((time.time() - start_time) * 1e9)
+    eval_count=len(output.outputs[0].token_ids)
+
+    return generated_text, duration_ns, eval_count
+
 async def stream_generate(
     prompt: str,
     sampling_params: SamplingParams
@@ -65,7 +76,7 @@ async def stream_generate(
     for output in results_generator:
         if output.outputs:
             chunk = {
-                "model": "Pokédex",
+                "model": model,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "response": output.outputs[0].text,
                 "done": False
@@ -75,7 +86,7 @@ async def stream_generate(
     # Final message
     duration_ns = int((time.time() - start_time) * 1e9)
     final_chunk = {
-        "model": "Pokédex",
+        "model": model,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "response": "",
         "done": True,
@@ -102,7 +113,7 @@ async def stream_chat(
     for output in results_generator:
         if output.outputs:
             chunk = {
-                "model": "Pokédex",
+                "model": model,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "message": {
                     "role": "assistant",
@@ -115,7 +126,7 @@ async def stream_chat(
     # Final message
     duration_ns = int((time.time() - start_time) * 1e9)
     final_chunk = {
-        "model": "Pokédex",
+        "model": model,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "message": {
             "role": "assistant",
