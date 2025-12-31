@@ -45,13 +45,14 @@ async def generate_api(data: Input_generate):
     
     sampling_params = parameterize_sampling(data)
 
+    # Streaming mode
     if data.stream:
         return StreamingResponse(
             stream_generate(data.prompt, data.model, sampling_params),
             media_type="application/x-ndjson"
         )
     
-    # non-streaming mode
+    # Non-streaming mode
     start_time = time.time()
     output = llm.generate([data.prompt], sampling_params)[0]
     generated_text = output.outputs[0].text
