@@ -13,7 +13,7 @@ sampling_params = SamplingParams(
     logprobs=100,
 )
 
-batch_size = config["reranking"]["batch_size"]
+batch_size = config["rerank"]["batch_size"]
 
 def format_instruction(query: str, document: str) -> str:
     messages = [

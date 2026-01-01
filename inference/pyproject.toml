@@ -15,14 +15,15 @@ version = "0.0.0"
 description = "Inference service"
 requires-python = ">=3.10"
 dependencies = [
-    "torch",
-    "transformers",
-    "sentence_transformers",
     "fastapi",
     "uvicorn",
     "httpx",
     "PyYAML",
     "pydantic",
     "accelerate",
-    "vllm",
+    "vllm==0.13.0",
+    "torch",
+    "transformers",
+    "sentence_transformers",
+    "bitsandbytes>=0.46.1"
 ]

@@ -2,14 +2,14 @@ from sentence_transformers import SentenceTransformer
 from .config import config
 
 embedder = SentenceTransformer(
-    config["embedding"]["model"],
+    config["embed"]["model"],
     cache_folder=config["cache"],
     trust_remote_code=True,
     device='cuda',
 )
 
-if config["embedding"]["asymmetric"]:
-    def embed(data, batch_size: int = config["embedding"]["batch_size"]):
+if config["embed"]["asymmetric"]:
+    def embed(data, batch_size: int = config["embed"]["batch_size"]):
         texts = [data.input] if isinstance(data.input, str) else data.input
         if data.type == "query":
             embeddings = embedder.encode(
@@ -26,7 +26,7 @@ if config["embedding"]["asymmetric"]:
             )
         return embeddings
 else:
-    def embed(data, batch_size: int = config["embedding"]["batch_size"]):
+    def embed(data, batch_size: int = config["embed"]["batch_size"]):
         texts = [data.input] if isinstance(data.input, str) else data.input
         embeddings = embedder.encode(
             texts,

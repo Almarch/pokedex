@@ -3,12 +3,12 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Literal
 from datetime import datetime, timezone
-from .embedder import embedder, embed
-from .reranker import rerank
-from .llm import (
-    llm, tokenizer, generate,
-    stream_generate, stream_chat,
-    parameterize_sampling, model,
+from .embed import embedder, embed
+from .rerank import rerank
+from .llm import llm, tokenizer
+from .generate import (
+    generate, stream_generate, stream_chat,
+    parameterize_sampling,
     BaseInputGen, BaseOutputGen, Message
 )
 
@@ -119,7 +119,7 @@ async def tags():
     return {
         "models": [
             {
-                "name": model,
+                "name": "Pokédex",
                 "modified_at": '1996-02-27T00:00:00+00:00',
                 "size": 0,
             }

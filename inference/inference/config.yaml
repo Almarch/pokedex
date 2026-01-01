@@ -1,15 +1,18 @@
 llm:
-  model: "mistralai/Mistral-Nemo-Instruct-2407"
-  quantization: "awq"
+  model: "Qwen/Qwen3-8B"
+  quantized: true
+  gpu_memory_utilization: 0.8
+
+generate:
   temperature: 0.35
   max_tokens: 256
   top_p: 0.9
   top_k: 50
 
-reranking:
+rerank:
   batch_size: 4
 
-embedding:
+embed:
   model: "Qwen/Qwen3-Embedding-0.6B"
   asymmetric: true
   batch_size: 16
