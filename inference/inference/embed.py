@@ -1,15 +1,23 @@
 from sentence_transformers import SentenceTransformer
 from .config import config
 
+model = config["embed"]["model"]
+batch_size = config["embed"]["batch_size"]
+
+if config["embed"]["gpu"]:
+    device = "cuda"
+else:
+    device = "cpu"
+
 embedder = SentenceTransformer(
-    config["embed"]["model"],
+    model,
     cache_folder=config["cache"],
     trust_remote_code=True,
-    device='cuda',
+    device=device,
 )
 
 if config["embed"]["asymmetric"]:
-    def embed(data, batch_size: int = config["embed"]["batch_size"]):
+    def embed(data, batch_size: int = batch_size):
         texts = [data.input] if isinstance(data.input, str) else data.input
         if data.type == "query":
             embeddings = embedder.encode(
@@ -26,7 +34,7 @@ if config["embed"]["asymmetric"]:
             )
         return embeddings
 else:
-    def embed(data, batch_size: int = config["embed"]["batch_size"]):
+    def embed(data, batch_size: int = batch_size):
         texts = [data.input] if isinstance(data.input, str) else data.input
         embeddings = embedder.encode(
             texts,

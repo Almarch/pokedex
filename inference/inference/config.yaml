@@ -1,11 +1,11 @@
 llm:
-  model: "Qwen/Qwen3-8B"
-  quantized: true
-  gpu_memory_utilization: 0.8
+  model: "Qwen/Qwen3-8B-AWQ"
+  gpu_memory_utilization: 0.875
+  max_model_len: 8192
 
 generate:
   temperature: 0.35
-  max_tokens: 256
+  max_tokens: 1024
   top_p: 0.9
   top_k: 50
 
@@ -14,8 +14,9 @@ rerank:
 
 embed:
   model: "Qwen/Qwen3-Embedding-0.6B"
+  gpu: false
   asymmetric: true
-  batch_size: 16
+  batch_size: 4
   
 cache: "/cache"
 
