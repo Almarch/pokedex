@@ -1,22 +1,21 @@
 llm:
-  model: "Qwen/Qwen3-8B-AWQ"
-  gpu_memory_utilization: 0.875
-  max_model_len: 8192
+  model: "casperhansen/mistral-nemo-instruct-2407-awq"
+  gpu_memory_utilization: 0.875 # 12 Go * 87.5% = 10.5 Go
+  max_model_len: 3072
 
 generate:
   temperature: 0.35
-  max_tokens: 1024
+  max_tokens: 512
   top_p: 0.9
   top_k: 50
 
 rerank:
-  batch_size: 4
+  batch_size: 3
 
 embed:
-  model: "Qwen/Qwen3-Embedding-0.6B"
+  model: "BAAI/bge-m3"
   gpu: false
-  asymmetric: true
-  batch_size: 4
+  batch_size: 6
   
 cache: "/cache"
 

@@ -21,7 +21,7 @@ class BaseInputGen(BaseModel):
     top_p: Optional[float] = config["generate"]["top_p"]
     top_k: Optional[int] = config["generate"]["top_k"]
 
-class BaseOutput(BaseModel):
+class BaseOutputGen(BaseModel):
     model: str
     created_at: str
     done: bool
@@ -43,7 +43,7 @@ def parameterize_sampling(data):
         
     return sampling_params
 
-async def generate(prompt, sampling_params):
+def generate(prompt, sampling_params):
     start_time = time.time()
     output = llm.generate([prompt], sampling_params)[0]
     generated_text = output.outputs[0].text

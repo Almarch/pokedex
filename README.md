@@ -218,7 +218,7 @@ k9s
 
 <!--
 watch -n 0.5 -c gpustat --color -cpu
-sudo ncdu / --exclude /mnt
+sudo ncdu / --exclude /mnt --exclude /init --exclude /proc --exclude /sys
 -->
 
 ## 🦙 Model collection

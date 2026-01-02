@@ -16,29 +16,11 @@ embedder = SentenceTransformer(
     device=device,
 )
 
-if config["embed"]["asymmetric"]:
-    def embed(data, batch_size: int = batch_size):
-        texts = [data.input] if isinstance(data.input, str) else data.input
-        if data.type == "query":
-            embeddings = embedder.encode(
-                texts,
-                prompt_name = "query",
-                convert_to_numpy=True,
-                batch_size=batch_size
-            )
-        else:
-            embeddings = embedder.encode(
-                texts,
-                convert_to_numpy=True,
-                batch_size=batch_size
-            )
-        return embeddings
-else:
-    def embed(data, batch_size: int = batch_size):
-        texts = [data.input] if isinstance(data.input, str) else data.input
-        embeddings = embedder.encode(
-            texts,
-            convert_to_numpy=True,
-            batch_size=batch_size
-        )
-        return embeddings
+def embed(input):
+    texts = [input] if isinstance(input, str) else input
+    embeddings = embedder.encode(
+        texts,
+        convert_to_numpy=True,
+        batch_size=batch_size,
+    )
+    return embeddings

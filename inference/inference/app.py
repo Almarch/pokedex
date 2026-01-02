@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Optional
 from datetime import datetime, timezone
 from .embed import embedder, embed
 from .rerank import rerank
@@ -17,7 +17,6 @@ app = FastAPI(title="Inference service", version="0.0.0")
 class Input_embed(BaseModel):
     model: str = ""
     input: str | list[str]
-    type: Literal["query", "document"] = "document"
 
 class Output_embed(BaseModel):
     model: str
@@ -26,7 +25,7 @@ class Output_embed(BaseModel):
 class Input_rerank(BaseModel):
     model: str = ""
     query: str
-    docuuments: list[str]
+    documents: list[str]
 
 class Output_rerank(BaseModel):
     model: str
@@ -47,7 +46,7 @@ class Output_chat(BaseOutputGen):
 
 @app.post("/api/embed", response_model=Output_embed)
 async def embed_api(data: Input_embed):
-    embeddings = embed(data)
+    embeddings = embed(data.input)
     return Output_embed(
         model=data.model,
         embeddings=embeddings.tolist()
@@ -69,7 +68,7 @@ async def generate_api(data: Input_generate):
     # Streaming mode
     if data.stream:
         return StreamingResponse(
-            stream_generate(data.prompt, data.model, sampling_params),
+            stream_generate(data.prompt, sampling_params),
             media_type="application/x-ndjson"
         )
     
@@ -93,7 +92,7 @@ async def chat_api(data: Input_chat):
     # Streaming mode
     if data.stream:
         return StreamingResponse(
-            stream_chat(data.messages, data.model, sampling_params),
+            stream_chat(data.messages, sampling_params),
             media_type="application/x-ndjson"
         )
     

@@ -28,16 +28,12 @@ def typed_gen(prompt, format):
 
     return format.model_validate_json(res).output
 
-def embed(
-    input,
-    type
-):
+def embed(input):
     response = requests.post(
         urljoin(config["inference"]["url"], "api/embed"),
         json = {
             "model": "",
-            "inputs": input,
-            "type": type,
+            "input": input,
         }
     )
     return response.json()["embeddings"]
