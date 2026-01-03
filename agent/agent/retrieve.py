@@ -2,7 +2,7 @@ from qdrant_client.models import Filter, FieldCondition, MatchValue
 from .qdrant import qdrant
 from .ollama import embed
 
-def vector_search(query, language, n=20):
+def vector_search(query, language, n=10):
     query = embed(query)
     docs = qdrant.query_points(
         collection_name= f"description_{language}",

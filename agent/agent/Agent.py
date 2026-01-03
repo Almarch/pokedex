@@ -25,11 +25,13 @@ class Agent():
         # Get the summary and language of the conversation
         (
             summary,
+            elements,
             language,
             is_about_pokemon
         ) = summarize(messages).values()
 
         print("Summary:", summary)
+        print("Elements:", elements)
         print("Language:", language)
 
         if language == "other":
@@ -48,16 +50,22 @@ class Agent():
 
         if not is_about_pokemon:
             return(sorry("not_about_pokemon"))
-
-        dv = pd.DataFrame(vector_search(summary, language))
+        
+        reps = []
+        for q in elements:
+            reps.extend(vector_search(q, language))
+        dv = pd.DataFrame(reps)
         dv["source"] = "vector"
+
         if len(mentioned_pokemons) > 0:
             dn = pd.DataFrame(name_search(mentioned_pokemons, language))
             dn["source"] = "regex"
             docs = pd.concat([dv, dn], ignore_index=True)
-            docs = docs.drop_duplicates(subset=["qdrant_id"])
         else:
             docs = dv
+        
+        docs = docs.drop_duplicates(subset=["qdrant_id"])
+        docs.reset_index()
         print(docs.value_counts("name"))
 
         docs["synthese"] = [
