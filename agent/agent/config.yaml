@@ -1,9 +1,8 @@
 ollama:
   url: "http://ollama:11434"
-  model: "qwen2.5:14b-instruct-q4_0"
-
-encoding:
-  url: "http://encoding:6999"
+  llm: "mistral-nemo:12b-instruct-2407-q4_0" # 7.1GB
+  embedding: "embeddinggemma:300m-bf16" # 622MB
+  reranking: "gemma3:4b-it-q4_K_M" # 3.3 GB
 
 qdrant:
   url: "http://qdrant:6333"
