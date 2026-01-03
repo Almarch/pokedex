@@ -233,9 +233,9 @@ The inference is realised by 3 models:
 
 - [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for quantization, and is fast enough on 12 Go VRAM.
 - [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
-- [Gemma3-4b](https://huggingface.co/google/gemma-3-4b-it) is a small and performant model with instruction and multilingual capavilities. It is used for the reranking task.
+- [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
 
-Nemo & Gemma3 are quantized (q4) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
+Nemo & Llama are quantized (q4) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 
 ## 🧩 Fill the Vector DB
 

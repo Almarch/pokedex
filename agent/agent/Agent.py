@@ -1,37 +1,44 @@
-from .instructions import sorry, format_rag
+from .instructions import sorry, format_docs
 from .summarize import summarize
-from .rag import name_search, vector_search, pokemon_synthese
+from .retrieve import name_search, vector_search, pokemon_synthese
 from .regex import pokemon_match
+from .rerank import get_scores, combine_scores, select_docs
+import pandas as pd
 
 class Agent():
     def __init__(self, body):
         self.body = body
 
-    def set_instructions(self, instructions):
+    def process(self):
+        instructions = self.get_instructions()
         system_message = {
             "role": "system",
             "content": instructions
         }
         self.body["messages"].insert(0, system_message)
-    
-    def process(self):
+        return self.body
 
-        keep_going = True
+    def get_instructions(self):
+
         messages = self.body["messages"]
 
         # Get the summary and language of the conversation
-        out = summarize(messages)
-        summary, language, is_about_pokemon = out.model_dump().values()
+        (
+            summary,
+            language,
+            is_about_pokemon
+        ) = summarize(messages).values()
 
         print("Summary:", summary)
         print("Language:", language)
 
         if language == "other":
-            instructions = sorry("other_language")
-            keep_going = False
+            return(sorry("other_language"))
 
         # find explicitely named pokémons
-        conv = "\n".join([msg["content"] for msg in messages])
+        conv = "\n".join([
+                msg["content"] for msg in messages
+        ])
         mentioned_pokemons = pokemon_match(conv, language)
         if len(mentioned_pokemons) > 0:
             is_about_pokemon = True
@@ -40,23 +47,37 @@ class Agent():
         print("Mentioned Pokémons:", mentioned_pokemons)
 
         if not is_about_pokemon:
-            instructions = sorry("not_about_pokemon")
-            keep_going = False
+            return(sorry("not_about_pokemon"))
 
-        # RAG
-        if keep_going:
-            rag = []
-            if len(mentioned_pokemons) > 0:
-                rag += name_search(mentioned_pokemons, language)
-            rag += vector_search(summary, language)
+        dv = pd.DataFrame(vector_search(summary, language))
+        dv["source"] = "vector"
+        if len(mentioned_pokemons) > 0:
+            dn = pd.DataFrame(name_search(mentioned_pokemons, language))
+            dn["source"] = "regex"
+            docs = pd.concat([dv, dn], ignore_index=True)
+            docs = docs.drop_duplicates(subset=["qdrant_id"])
+        else:
+            docs = dv
+        print(docs.value_counts("name"))
 
-            rag = [pokemon_synthese(doc, language) for doc in rag]
+        docs["synthese"] = [
+            pokemon_synthese(
+                row.to_dict(),
+                language
+            ) for _, row in docs.iterrows()
+        ]
 
-            print("Retrieved context:", rag)
-            instructions = format_rag(rag)
+        scores = get_scores(summary, docs["synthese"])
+        scores = pd.DataFrame(scores)
+        scores["rank"] = combine_scores(scores)
+        docs = pd.concat([docs,scores],axis=1)
 
-        self.set_instructions(instructions)
-        return self.body
+        docs = select_docs(docs)
+        docs = docs["synthese"].to_list()
+        
+        docs = "\n\n".join(f"- {doc}" for doc in docs)
+        print(docs)
 
+        return format_docs(docs)
 
     
