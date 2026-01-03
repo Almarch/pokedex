@@ -1,6 +1,7 @@
 import requests
 from .config import config
 from urllib.parse import urljoin
+from typing import Literal
 
 def pull():
     for model in [
@@ -20,11 +21,12 @@ def generate(
     prompt,
     format = None,
     temperature = 0,
+    model = config["ollama"]["llm"],
 ):
     response = requests.post(
         urljoin(config["ollama"]["url"], "api/generate"),
         json = {
-            "model": config["ollama"]["llm"],
+            "model": model,
             "prompt": prompt,
             "format": format,
             "stream": False,
@@ -33,10 +35,11 @@ def generate(
     )
     return response.json()["response"]
 
-def typed_gen(prompt, format):
+def typed_gen(prompt, format, *args, **kwargs):
     res = generate(
             prompt = prompt,
-            format = format.model_json_schema()
+            format = format.model_json_schema(),
+            *args, **kwargs
         )
 
     return format.model_validate_json(res).output
@@ -52,3 +55,46 @@ def embed(
         }
     )
     return response.json()["embedding"]
+
+class Output(BaseModel):
+    relevance: Literal[0, 1, 2, 3]
+
+class Format(BaseModel):
+    output: Output
+
+def rerank(
+    query,
+    documents,
+):
+    scores = []
+    for doc in documents:
+
+        prompt = f"""
+### INSTRUCTIONS
+
+You must assess the relevance of a document to address a given query.
+
+Output a JSON: {{"output": {{"relevance": 0 | 1 | 2 | 3}}}}
+with the relevancy score as:
+
+- 0: the document is very irrelevant
+- 1: the document is a bit irrelevant
+- 2: the document is a bit relevant
+- 3: the document is very relevant
+
+### QUERY
+
+{query}
+
+### DOCUMENT
+
+{doc}
+"""
+        scores.append(
+            typed_gen(
+                prompt,
+                Format,
+                model = config["ollama"]["reranking"],
+            )
+        )
+    return scores
