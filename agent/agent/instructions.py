@@ -40,10 +40,9 @@ def format_rag(
     prompt = intro() + f"""
 Some information has been retrieved to help you build the most
 appropriate answer. Use this information but do not mention to the
-user: they don't need to know where does your knowledge come from.
+user: they don't need to know where does your knowledge comes from.
 
-Do not rely on your prior knowledge about Pokémons.
-Only use the information provided below to answer the user.
+Use ONLY the following information to answer. Do not rely on prior knowledge.
 
 ### INFORMATION
 

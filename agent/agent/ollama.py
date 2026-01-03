@@ -58,7 +58,9 @@ def embed(
     return response.json()["embedding"]
 
 class Relevance(BaseModel):
-    relevance: Literal[0, 1, 2, 3]
+    topicality: Literal[0, 1, 2, 3]
+    specificity: Literal[0, 1, 2, 3]
+    clarity: Literal[0, 1, 2, 3]
 
 def rerank(
     query,
@@ -72,13 +74,21 @@ def rerank(
 
 You must assess the relevance of a document to address a given query.
 
-Output a JSON: {{"relevance": 0 | 1 | 2 | 3}}
-with the relevancy score as:
+For more stable scoring, rate the document according to 3 aspects:
 
-- 0: the document is very irrelevant
-- 1: the document is a little bit irrelevant
-- 2: the document is a little bit relevant
-- 3: the document is very relevant
+1. Topicality: How well the document is about the query.
+2. Specificity: How specific and detailed the information is.
+3. Clarity: How clear and direct the information is.
+
+Output ONLY a JSON object with 3 scores (0-3) for these aspects, as:
+
+{{
+  "topicality": 0 | 1 | 2 | 3,
+  "specificity": 0 | 1 | 2 | 3,
+  "clarity": 0 | 1 | 2 | 3
+}}
+
+Do not explain your answer. Output ONLY JSON.
 
 ### QUERY
 
@@ -87,12 +97,11 @@ with the relevancy score as:
 ### DOCUMENT
 
 {doc}
-"""
-        scores.append(
-            typed_gen(
-                prompt,
-                Relevance,
-                model = config["ollama"]["reranking"],
-            )
+"""     
+        score = typed_gen(
+            prompt,
+            Relevance,
+            model = config["ollama"]["reranking"],
         )
-    return int(scores)
+        scores.append(score)
+    return scores

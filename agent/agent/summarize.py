@@ -16,7 +16,16 @@ def summarize(
 You are an assistant and your role is to process a conversation.
 You generate a json with an output field, containing 3 subfields:
 summary, language, is_about_pokemon.
-Output only valid JSON. No extra text.
+
+Output ONLY a JSON object with 3 scores (0-3) for these aspects, as:
+
+{{
+  "summary": "...",
+  "language": "...",
+  "is_about_pokemon": true|false
+}}
+
+Do not explain your answer. Output ONLY JSON.
 
 You have 4 tasks:
 
@@ -26,7 +35,7 @@ You have 4 tasks:
 
 Task 1: Conversation summary:
 - The summary must capture the main points of the last message.
-- Ther rest of the conversation is there to provide context and to
+- The rest of the conversation is there to provide context and to
 better understand the last message.
 - The summary must be at maximum a few sentences long.
 - The summary must be written in the same language as
