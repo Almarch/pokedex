@@ -2,6 +2,7 @@ import requests
 from .config import config
 from urllib.parse import urljoin
 from typing import Literal
+from pydantic import BaseModel
 
 def pull():
     for model in [
@@ -35,14 +36,14 @@ def generate(
     )
     return response.json()["response"]
 
-def typed_gen(prompt, format, *args, **kwargs):
+def typed_gen(prompt, format, model = None):
     res = generate(
             prompt = prompt,
             format = format.model_json_schema(),
-            *args, **kwargs
+            **({"model": model} if model else {}),
         )
 
-    return format.model_validate_json(res).output
+    return format.model_validate_json(res)
 
 def embed(
     prompt,
@@ -56,11 +57,8 @@ def embed(
     )
     return response.json()["embedding"]
 
-class Output(BaseModel):
+class Relevance(BaseModel):
     relevance: Literal[0, 1, 2, 3]
-
-class Format(BaseModel):
-    output: Output
 
 def rerank(
     query,
@@ -74,12 +72,12 @@ def rerank(
 
 You must assess the relevance of a document to address a given query.
 
-Output a JSON: {{"output": {{"relevance": 0 | 1 | 2 | 3}}}}
+Output a JSON: {{"relevance": 0 | 1 | 2 | 3}}
 with the relevancy score as:
 
 - 0: the document is very irrelevant
-- 1: the document is a bit irrelevant
-- 2: the document is a bit relevant
+- 1: the document is a little bit irrelevant
+- 2: the document is a little bit relevant
 - 3: the document is very relevant
 
 ### QUERY
@@ -93,8 +91,8 @@ with the relevancy score as:
         scores.append(
             typed_gen(
                 prompt,
-                Format,
+                Relevance,
                 model = config["ollama"]["reranking"],
             )
         )
-    return scores
+    return int(scores)

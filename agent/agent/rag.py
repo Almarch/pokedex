@@ -39,5 +39,5 @@ def pokemon_synthese(data, language):
         "de": "{name} ist ein {type}. {description}"
     }
     
-    template = templates.get(language, templates["en"])
+    template = templates[language]
     return template.format(**data)

@@ -1,14 +1,11 @@
 from .ollama import typed_gen
 from pydantic import BaseModel
-from typing import Literal, List
+from typing import Literal
 
-class Output(BaseModel):
+class Summary(BaseModel):
     summary: str
     language: Literal["fr", "de", "es", "it", "en", "other"]
     is_about_pokemon: bool
-
-class Format(BaseModel):
-    output: Output
 
 def summarize(
     conversation,
@@ -56,4 +53,4 @@ changed the topic in their last message, set it to false.
 ### OUTPUT
     """
 
-    return typed_gen(prompt, Format)
+    return typed_gen(prompt, Summary)

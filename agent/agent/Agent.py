@@ -1,8 +1,7 @@
-from .sorry import sorry
-from .format_rag import format_rag
+from .instructions import sorry, format_rag
 from .summarize import summarize
 from .rag import name_search, vector_search, pokemon_synthese
-from .pokemon_match import pokemon_match
+from .regex import pokemon_match
 
 class Agent():
     def __init__(self, body):
