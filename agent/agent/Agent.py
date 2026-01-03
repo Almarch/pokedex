@@ -52,6 +52,7 @@ class Agent():
             return(sorry("not_about_pokemon"))
         
         reps = []
+        elements.extend([summary])
         for q in elements:
             reps.extend(vector_search(q, language))
         dv = pd.DataFrame(reps)
@@ -65,7 +66,7 @@ class Agent():
             docs = dv
         
         docs = docs.drop_duplicates(subset=["qdrant_id"])
-        docs.reset_index()
+        docs.reset_index(drop=True, inplace=True)
         print(docs.value_counts("name"))
 
         docs["synthese"] = [

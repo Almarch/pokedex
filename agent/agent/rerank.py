@@ -87,7 +87,7 @@ def combine_scores(
 
 def select_docs(
     docs,
-    threshold = 0.5,
+    threshold = 0.7,
     n_target_docs = 5,
 ):
     docs = docs.copy()
