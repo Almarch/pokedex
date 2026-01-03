@@ -25,4 +25,5 @@ dependencies = [
     "pydantic",
     "scikit-learn",
     "regex",
+    "pandas",
 ]

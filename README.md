@@ -182,17 +182,6 @@ Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-dep
 
 </details>
 
-Build the custom images and provide them to k3s:
-
-```sh
-docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
-docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
-docker build -t poke-encoding:latest -f dockerfiles/dockerfile.encoding .
-
-docker save poke-agent:latest | sudo k3s ctr images import -
-docker save poke-notebook:latest | sudo k3s ctr images import -
-docker save poke-encoding:latest | sudo k3s ctr images import -
-```
 
 Mount the log & notebook volumes:
 
@@ -201,6 +190,16 @@ sudo mkdir -p /mnt/k3s/logs
 sudo mkdir -p /mnt/k3s/notebook
 sudo mount --bind "$(pwd)/logs" /mnt/k3s/logs
 sudo mount --bind "$(pwd)/notebook" /mnt/k3s/notebook
+```
+
+Build the custom images and provide them to k3s:
+
+```sh
+docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
+docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
+
+docker save poke-agent:latest | sudo k3s ctr images import -
+docker save poke-notebook:latest | sudo k3s ctr images import -
 ```
 
 K3s use docker latest images automatically.
@@ -216,15 +215,27 @@ Check the installation status:
 k9s
 ```
 
-## 🦙 Models collection
+## 🦙 Collect Ollama models
 
-All models are automatically pulled when the agent and encoding services instanciate.
+An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
 
-All models (LLM, embedding, reranker) are from the [Qwen](https://huggingface.co/Qwen) family. Qwen models have been selected for their functional and multilingual capabilities.
+```sh
+kubectl get pods
+```
 
-An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack. It accesses the GPU and hosts the LLM.
+Pull the models from the agent pod:
 
-A custom service manages all encoding tasks.
+```sh
+kubectl exec -it <pod-name> -- python -c "from agent.ollama import pull; pull()"
+```
+
+The inference is realised by 3 models:
+
+- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for quantization, and is fast enough on 12 Go VRAM.
+- [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
+- [Gemma3-4b](https://huggingface.co/google/gemma-3-4b-it) is a small and performant model with instruction and multilingual capavilities. It is used for the reranking task.
+
+Nemo & Gemma3 are quantized (q4) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 
 ## 🧩 Fill the Vector DB
 

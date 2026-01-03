@@ -1,6 +1,6 @@
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from .qdrant import qdrant
-from .encoding import embed
+from .ollama import embed
 
 def vector_search(query, language, n=10):
     query = embed(query)

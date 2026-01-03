@@ -1,7 +1,7 @@
 ollama:
   url: "http://ollama:11434"
-  llm: "mistral-nemo:12b-instruct-2407-q4_0" # 7.1GB
-  embedding: "embeddinggemma:300m-bf16" # 622MB
+  llm: "mistral-nemo:12b-instruct-2407-q4_0" # 7.1 GB
+  embedding: "embeddinggemma:300m-bf16" # 621 MB
   reranking: "gemma3:4b-it-q4_K_M" # 3.3 GB
 
 qdrant:
