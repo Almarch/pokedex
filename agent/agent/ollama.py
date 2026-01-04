@@ -3,7 +3,7 @@ from .config import config
 from urllib.parse import urljoin
 import json
 
-def pull():
+def pull() -> None:
     for model in [
         config["ollama"]["llm"],
         config["ollama"]["embedding"],
@@ -18,11 +18,11 @@ def pull():
         )
 
 def generate(
-    prompt,
-    format = None,
-    temperature = 0,
-    model = config["ollama"]["llm"],
-):
+        prompt: str,
+        format: type,
+        temperature: float = 0,
+        model: str = config["ollama"]["llm"],
+    ) -> str:
     response = requests.post(
         urljoin(config["ollama"]["url"], "api/generate"),
         json = {
@@ -35,7 +35,11 @@ def generate(
     )
     return response.json()["response"]
 
-def typed_gen(prompt, format, model = None):
+def typed_gen(
+        prompt: str,
+        format: type,
+        model: str = None
+    ) -> dict:
     res = generate(
             prompt = prompt,
             format = format.model_json_schema(),
@@ -45,8 +49,9 @@ def typed_gen(prompt, format, model = None):
     return json.loads(res)
 
 def embed(
-    prompt,
-):
+        prompt: str,
+    ) -> list[float]:
+    
     response = requests.post(
         config["ollama"]["url"] + "/api/embeddings",
         json = {

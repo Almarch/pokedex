@@ -1,12 +1,15 @@
 from .instructions import sorry, format_docs
 from .summarize import summarize
 from .retrieve import name_search, vector_search, pokemon_synthese
-from .regex import pokemon_match
+from .regex import pokemon_match, double_check
 from .rerank import get_scores, combine_scores, select_docs
 import pandas as pd
 
 class Agent():
-    def __init__(self, body):
+    def __init__(
+            self,
+            body: dict
+        ):
         self.body = body
 
     def process(self):
@@ -18,7 +21,9 @@ class Agent():
         self.body["messages"].insert(0, system_message)
         return self.body
 
-    def get_instructions(self):
+    def get_instructions(
+            self
+        ) -> str:
 
         messages = self.body["messages"]
 
@@ -42,6 +47,13 @@ class Agent():
                 msg["content"] for msg in messages
         ])
         mentioned_pokemons = pokemon_match(conv, language)
+
+        if len(mentioned_pokemons) > 0:
+            mentioned_pokemons = double_check(
+                messages,
+                mentioned_pokemons
+            )
+
         if len(mentioned_pokemons) > 0:
             is_about_pokemon = True
 
@@ -51,6 +63,7 @@ class Agent():
         if not is_about_pokemon:
             return(sorry("not_about_pokemon"))
         
+        # Retrieve relevant documents
         reps = []
         elements.extend([summary])
         for q in elements:
@@ -58,6 +71,7 @@ class Agent():
         dv = pd.DataFrame(reps)
         dv["source"] = "vector"
 
+        # doc formationg
         if len(mentioned_pokemons) > 0:
             dn = pd.DataFrame(name_search(mentioned_pokemons, language))
             dn["source"] = "regex"
@@ -76,6 +90,7 @@ class Agent():
             ) for _, row in docs.iterrows()
         ]
 
+        # Rerank documents
         scores = get_scores(summary, docs["synthese"])
         scores = pd.DataFrame(scores)
         scores["rank"] = combine_scores(scores)

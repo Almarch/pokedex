@@ -9,3 +9,12 @@ qdrant:
 
 logs:
   path: "/logs"
+
+languages:
+  supported:
+    - "fr"
+    - "de"
+    - "es"
+    - "it"
+    - "en"
+  default: "en"

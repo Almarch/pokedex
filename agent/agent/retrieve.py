@@ -1,8 +1,14 @@
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from .qdrant import qdrant
 from .ollama import embed
+from .config import Languages, default_language
 
-def vector_search(query, language, n=10):
+def vector_search(
+        query: str, 
+        language: Languages = default_language,
+        n: int = 10
+    ) -> list[dict]:
+
     query = embed(query)
     docs = qdrant.query_points(
         collection_name= f"description_{language}",
@@ -12,7 +18,11 @@ def vector_search(query, language, n=10):
     docs = [{**point.payload, "qdrant_id": point.id} for point in docs.points]
     return docs
 
-def name_search(names, language):
+def name_search(
+        names,
+        language: Languages = default_language,
+    ) -> list[dict]:
+
     docs, _ = qdrant.scroll(
         collection_name=f"description_{language}",
         scroll_filter=Filter(
@@ -30,7 +40,10 @@ def name_search(names, language):
     docs = [{**point.payload, "qdrant_id": point.id} for point in docs]
     return docs
 
-def pokemon_synthese(data, language):
+def pokemon_synthese(
+        data: dict,
+        language: Languages = default_language,
+    ) -> str:
     templates = {
         "en": "{name} is a {type}. {description}",
         "fr": "{name} est un {type}. {description}",

@@ -2,6 +2,7 @@ from .ollama import typed_gen
 from .config import config
 from typing import Literal
 from pydantic import BaseModel
+from pandas import DataFrame
 
 class Relevance(BaseModel):
     topicality: Literal[0, 1, 2, 3]
@@ -11,9 +12,10 @@ class Relevance(BaseModel):
     clarity: Literal[0, 1, 2, 3]
 
 def get_scores(
-    query,
-    documents,
-):
+        query: str,
+        documents: list[str],
+    ) -> list[Relevance]:
+    
     scores = []
     for doc in documents:
 
@@ -70,26 +72,27 @@ Do not explain your answer. Output ONLY JSON.
     return scores
 
 def combine_scores(
-    scores,
-    power = 1.5,
-    weights = {
-        "topicality": 6,
-        "completeness": 3,
-        "usefulness": 3,
-        "specificity": 2,
-        "clarity": 1
-    }
-):
+        scores: DataFrame,
+        power: float = 1.5,
+        weights: dict = {
+            "topicality": 6,
+            "completeness": 3,
+            "usefulness": 3,
+            "specificity": 2,
+            "clarity": 1
+        }
+    ) -> list[float]:
     weights = [weights[k] for k in scores]
     score_max = sum([w * 3**power for w in weights])
     final_score = scores**power @ weights
     return final_score / score_max
 
 def select_docs(
-    docs,
-    threshold = 0.7,
-    n_target_docs = 5,
-):
+        docs: DataFrame,
+        threshold: float = 0.7,
+        n_target_docs: int = 5,
+    ) -> DataFrame:
+    
     docs = docs.copy()
     if (docs["rank"] > threshold).sum() >= n_target_docs:
         docs = docs[docs["rank"] > threshold]
