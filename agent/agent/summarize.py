@@ -13,6 +13,8 @@ def summarize(
     conversation: str | list[dict],
 ) -> Summary:
     
+    conversation = str(conversation)
+    
     prompt = f"""
 ### INSTRUCTIONS
 

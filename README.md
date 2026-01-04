@@ -5,7 +5,7 @@ The goal of this application is to provide an AI assistant to the world of Poké
 
 It consists in a stack of services orchestrated by Kubernetes. In a nutshell, it encompasses an UI and an inference service. A middleware intercepts the requests between these services, processes them, and augments them with information from a vector DB. The answer is then streamed back to the user.
 
-The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
+The project has been set-up such as the European official languages (en, es, fr, de, it) of the game are supported by the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
 
 ## 📱 Utilization
 
@@ -24,9 +24,11 @@ As examplified, the app covers 2 use cases:
 
 ## 📋 Specifications
 
-The application requires a Nvidia GPU and it is designed for a GNU/Linux server. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
+The project is designed to run on a gaming computer with a Nvidia GPU.
 
-It has been succesfully run on 12Go VRAM + 32Go RAM. With more constrained resources, consider using a lighter LLM.
+It is compatible with GNU/Linux and Windows WSL.
+
+It has been succesfully run on 12Go VRAM + 32Go RAM. It may run with more limited resources with lighter models.
 
 ## 🚀 Launch the project
 
@@ -37,7 +39,24 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes.
+The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
+
+<details><summary>🐋 Nvidia container toolkit installation</summary>
+
+```sh
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+sed "s/\$(ARCH)/$(dpkg --print-architecture)/g" | \
+sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+```
+</details>
+</br>
+
+<details><summary>🛞 Set-up Kubernetes</summary>
 
 ```sh
 # install brew
@@ -67,18 +86,6 @@ To load kubectl, k9s & helm:
 
 ```sh
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-```
-
-Generate all secrets:
-
-```sh
-echo "WEBUI_SECRET_KEY=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)" > .env
-
-kubectl create secret generic all-secrets \
-  --from-env-file=.env \
-  --dry-run=client -o yaml > k8s/secrets.yaml
-
-kubectl apply -f k8s/secrets.yaml
 ```
 
 Install ingress and cert-manager:
@@ -116,21 +123,10 @@ kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
 
 kubectl describe node | grep -i nvidia
 ```
+</details>
+</br>
 
 <details><summary>🪟 WSL specificities</summary>
-
-To install the NVIDIA container toolkit:
-
-```sh
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-sed "s/\$(ARCH)/$(dpkg --print-architecture)/g" | \
-sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-sudo apt update
-sudo apt install -y nvidia-container-toolkit
-```
 
 In `C:/Users/myUser`, create: `.wslconfig` with:
 
@@ -177,10 +173,28 @@ bash
 sudo systemctl restart k3s
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 ```
-
-Finally, change `./k8s/ollama/deployment.yaml` with the content of `./ollama-deploy-wsl2.yaml`.
-
 </details>
+</br>
+
+<details><summary>🗺️ App deployment</summary>
+
+To interact with Kubernetes:
+
+```sh
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
+Generate all secrets:
+
+```sh
+echo "WEBUI_SECRET_KEY=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)" > .env
+
+kubectl create secret generic all-secrets \
+  --from-env-file=.env \
+  --dry-run=client -o yaml > k8s/secrets.yaml
+
+kubectl apply -f k8s/secrets.yaml
+```
 
 
 Mount the log & notebook volumes:
@@ -215,6 +229,9 @@ Check the installation status:
 k9s
 ```
 
+</details>
+</br>
+
 ## 🦙 Collect Ollama models
 
 An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
@@ -235,7 +252,7 @@ The inference is realised by 3 models:
 - [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
 - [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
 
-Nemo & Llama are quantized (q4) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
+Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 
 ## 🧩 Fill the Vector DB
 
@@ -257,7 +274,7 @@ The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 </div>
 <br>
 
-On this figure, we can have a glance at how a few of the Pokémon records have been ordered on a 2D plane from the embedding space of the French collection.
+On this figure, we can have a glance at how a few of the Pokémon records have been ordered on a 2D plane from the embedding space of the English collection.
 
 ## 🎮 Access the WebUI
 

@@ -6,7 +6,7 @@ from .config import Languages, default_language
 def vector_search(
         query: str, 
         language: Languages = default_language,
-        n: int = 10
+        n: int = 5
     ) -> list[dict]:
 
     query = embed(query)

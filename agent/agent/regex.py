@@ -45,20 +45,29 @@ def double_check(
         text: str | list[dict]
     ) -> list[str]:
 
+    text = str(text)
+
+    fields = {}
+    for word in words:
+        fields[word] = (bool, ...)
+    
     Confirmations = create_model(
         'Confirmations',
-        **{word: (bool, ...) for word in words}
+        **fields
     )
 
     prompt = f"""
 ### INSTRUCTIONS
 
 You are an assistant that verifies whether certain
-Pokémons names are mentioned in a given text.
+Pokémons names are mentioned in a given conversation.
 
-You receive a text and a list of Pokémon names as input.
-For each Pokémon name, check if it is mentioned in the text
-and return a boolean value accordingly.
+You receive a list of Pokémons and a conversation between
+a user and an assistant as input. For each Pokémon name,
+check if it is mentioned in the conversation and return :
+
+- True if it is mentioned.
+- False otherwise.
 
 Some Pokémons names may have typos or slight variations.
 Use the context to make an informed decision.
@@ -72,7 +81,7 @@ and for the following Pokémon names to verify:
 
 ### INPUT
 
-Text:
+Conversation:
 
 {text}
 
@@ -84,5 +93,5 @@ Text:
     )
     return [
         word for word in words 
-        if getattr(confirmations, word)
+        if confirmations[word]
     ]

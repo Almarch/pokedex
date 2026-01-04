@@ -48,17 +48,19 @@ class Agent():
         ])
         mentioned_pokemons = pokemon_match(conv, language)
 
+        print("Pokémons identified with regex:", mentioned_pokemons)
+
         if len(mentioned_pokemons) > 0:
             mentioned_pokemons = double_check(
+                mentioned_pokemons,
                 messages,
-                mentioned_pokemons
             )
 
         if len(mentioned_pokemons) > 0:
             is_about_pokemon = True
 
         print("Is about Pokémon:", is_about_pokemon)
-        print("Mentioned Pokémons:", mentioned_pokemons)
+        print("Truly mentioned Pokémons:", mentioned_pokemons)
 
         if not is_about_pokemon:
             return(sorry("not_about_pokemon"))
