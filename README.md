@@ -41,6 +41,7 @@ cd pokedex
 
 The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
+</br>
 <details><summary>🐋 Nvidia container toolkit installation</summary>
 
 ```sh
@@ -195,7 +196,6 @@ kubectl create secret generic all-secrets \
 
 kubectl apply -f k8s/secrets.yaml
 ```
-
 
 Mount the log & notebook volumes:
 
