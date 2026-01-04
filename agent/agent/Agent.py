@@ -1,57 +1,109 @@
-from .sorry import sorry
-from .format_rag import format_rag
+from .instructions import sorry, format_docs
 from .summarize import summarize
-from .rag import name_search, vector_search
-from .pokemon_match import pokemon_match
+from .retrieve import name_search, vector_search, pokemon_synthese
+from .regex import pokemon_match, double_check
+from .rerank import get_scores, combine_scores, select_docs
+import pandas as pd
 
 class Agent():
-    def __init__(self, body):
+    def __init__(
+            self,
+            body: dict
+        ):
         self.body = body
 
-    def set_instructions(self, instructions):
+    def process(self):
+        instructions = self.get_instructions()
         system_message = {
             "role": "system",
             "content": instructions
         }
         self.body["messages"].insert(0, system_message)
-    
-    def process(self):
+        return self.body
 
-        out = summarize(self.body["messages"])
-        summary, language, is_about_pokemon = out.model_dump().values()
+    def get_instructions(
+            self
+        ) -> str:
+
+        messages = self.body["messages"]
+
+        # Get the summary and language of the conversation
+        (
+            summary,
+            elements,
+            language,
+            is_about_pokemon
+        ) = summarize(messages).values()
 
         print("Summary:", summary)
+        print("Elements:", elements)
         print("Language:", language)
 
-        conv = "\n".join([msg["content"] for msg in self.body["messages"]])
+        if language == "other":
+            return(sorry("other_language"))
+
+        # find explicitely named pokémons
+        conv = "\n".join([
+                msg["content"] for msg in messages
+        ])
         mentioned_pokemons = pokemon_match(conv, language)
+
+        print("Pokémons identified with regex:", mentioned_pokemons)
+
+        if len(mentioned_pokemons) > 0:
+            mentioned_pokemons = double_check(
+                mentioned_pokemons,
+                messages,
+            )
+
         if len(mentioned_pokemons) > 0:
             is_about_pokemon = True
 
         print("Is about Pokémon:", is_about_pokemon)
-        print("Mentioned Pokémons:", mentioned_pokemons)
-
-        keep_going = True
-        rag = []
-
-        if len(mentioned_pokemons) > 0:
-            rag += name_search(mentioned_pokemons, language)
+        print("Truly mentioned Pokémons:", mentioned_pokemons)
 
         if not is_about_pokemon:
-            instructions = sorry("not_about_pokemon")
-            keep_going = False
+            return(sorry("not_about_pokemon"))
         
-        if language == "other":
-            instructions = sorry("other_language")
-            keep_going = False
+        # Retrieve relevant documents
+        reps = []
+        elements.extend([summary])
+        for q in elements:
+            reps.extend(vector_search(q, language))
+        dv = pd.DataFrame(reps)
+        dv["source"] = "vector"
 
-        if keep_going:
-            rag += vector_search(summary, language)
-            print("Retrieved context:", rag)
-            instructions = format_rag(rag)
+        # doc formationg
+        if len(mentioned_pokemons) > 0:
+            dn = pd.DataFrame(name_search(mentioned_pokemons, language))
+            dn["source"] = "regex"
+            docs = pd.concat([dv, dn], ignore_index=True)
+        else:
+            docs = dv
+        
+        docs = docs.drop_duplicates(subset=["qdrant_id"])
+        docs.reset_index(drop=True, inplace=True)
+        print(docs.value_counts("name"))
 
-        self.set_instructions(instructions)
-        return self.body
+        docs["synthese"] = [
+            pokemon_synthese(
+                row.to_dict(),
+                language
+            ) for _, row in docs.iterrows()
+        ]
 
+        # Rerank documents
+        scores = get_scores(summary, docs["synthese"])
+        scores = pd.DataFrame(scores)
+        scores["rank"] = combine_scores(scores)
+        docs = pd.concat([docs,scores],axis=1)
+
+        docs = select_docs(docs)
+        docs = docs["synthese"].to_list()
+        
+        docs = "\n\n".join(f"- {doc}" for doc in docs)
+        print(docs)
+
+        return format_docs(docs)
 
     

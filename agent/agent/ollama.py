@@ -1,29 +1,32 @@
 import requests
 from .config import config
 from urllib.parse import urljoin
+import json
 
-def pull():
-    response = requests.post(
-        urljoin(config["ollama"]["url"], "api/pull"),
-        json= {
-            "name": config["ollama"]["model"]
-        },
-        stream=True
-    )
-
-    for line in response.iter_lines():
-        if line:
-            print(line.decode('utf-8'))
+def pull() -> None:
+    for model in [
+        config["ollama"]["llm"],
+        config["ollama"]["embedding"],
+        config["ollama"]["reranking"],
+    ]:
+        requests.post(
+            urljoin(config["ollama"]["url"], "api/pull"),
+            json= {
+                "name": model,
+            },
+            stream=False
+        )
 
 def generate(
-    prompt,
-    format = None,
-    temperature = 0,
-):
+        prompt: str,
+        format: type,
+        temperature: float = 0,
+        model: str = config["ollama"]["llm"],
+    ) -> str:
     response = requests.post(
         urljoin(config["ollama"]["url"], "api/generate"),
         json = {
-            "model": config["ollama"]["model"],
+            "model": model,
             "prompt": prompt,
             "format": format,
             "stream": False,
@@ -32,11 +35,29 @@ def generate(
     )
     return response.json()["response"]
 
-def typed_gen(prompt, format):
+def typed_gen(
+        prompt: str,
+        format: type,
+        model: str = None
+    ) -> dict:
     res = generate(
             prompt = prompt,
-            format = format.model_json_schema()
+            format = format.model_json_schema(),
+            **({"model": model} if model else {}),
         )
 
-    return format.model_validate_json(res).output
+    return json.loads(res)
+
+def embed(
+        prompt: str,
+    ) -> list[float]:
+    
+    response = requests.post(
+        config["ollama"]["url"] + "/api/embeddings",
+        json = {
+            "model": config["ollama"]["embedding"],
+            "prompt": prompt,
+        }
+    )
+    return response.json()["embedding"]
 

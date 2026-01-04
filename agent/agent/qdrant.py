@@ -1,28 +1,29 @@
 from qdrant_client import QdrantClient
-from .config import config
-from .encoding import embed
+from .config import config, Languages, default_language
+from .ollama import embed
 from sklearn.metrics.pairwise import cosine_similarity
 from qdrant_client.http import models
 import uuid
 import numpy as np
+from pandas import DataFrame
 
 qdrant = QdrantClient(url = config["qdrant"]["url"])
 
 def fill(
-        names,
-        flavors,
-        lang = "en",
-        threshold = .9, # cosinus similarity from which we consider 2 vectors as redondant
-    ):
-    collection_descriptions = f"description_{lang}"
-    collection_names = f"name_{lang}"
+        names: DataFrame,
+        flavors: DataFrame,
+        language: Languages = default_language,
+        threshold: float = .9, # cosinus similarity from which we consider 2 vectors as redondant
+    ) -> None:
+    collection_descriptions = f"description_{language}"
+    collection_names = f"name_{language}"
     
     qdrant.delete_collection(collection_name = collection_descriptions)
     qdrant.delete_collection(collection_name = collection_names)
     qdrant.create_collection(
         collection_name = collection_descriptions,
         vectors_config=models.VectorParams(
-            size= len(embed("lorem ipsum", type = "document")),
+            size= len(embed("lorem ipsum")),
             distance=models.Distance.COSINE
         )
     )
@@ -43,7 +44,7 @@ def fill(
         flavor_list = [x.replace("\r", "").replace("\n", " ") for x in flavor_list]
         
         # embeddings
-        vector_list = [embed(x, type = "document") for x in flavor_list]
+        vector_list = [embed(x) for x in flavor_list]
         
         # remove redundant descriptions
         if len(vector_list) == 0:

@@ -40,14 +40,14 @@ def generate_request_id() -> str:
     return f"{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}"
 
 async def log_transaction(
-    request_id: str, 
-    direction: str, 
-    method: str, 
-    path: str, 
-    headers: Dict[str, str], 
-    body: Optional[Union[Dict[str, Any], str, bytes]] = None,
-    status_code: Optional[int] = None
-) -> None:
+        request_id: str, 
+        direction: str, 
+        method: str, 
+        path: str, 
+        headers: Dict[str, str], 
+        body: Optional[Union[Dict[str, Any], str, bytes]] = None,
+        status_code: Optional[int] = None
+    ) -> None:
     """
     Log transaction details to a JSON file.
     
