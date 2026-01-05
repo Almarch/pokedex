@@ -286,7 +286,7 @@ The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
 ### 🎮 Access the WebUI
 
-Reach https://localhost and parameterize the interface. Deactivate the user access to the encoder model, and make the LLM accessible to all users. If needed, set up accounts to the family & friends you would like to share the app with.
+Reach https://localhost and parameterize the interface. Deactivate the user access to the embedding and reraking models, and make the LLM accessible to all users. If needed, set up accounts to the family & friends you would like to share the app with.
 
 <details><summary>🕳️ Tunneling</summary>
 
