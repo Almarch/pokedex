@@ -238,7 +238,7 @@ kubectl create secret generic all-secrets \
 kubectl apply -f k8s/secrets.yaml
 ```
 
-Mount the log & notebook volumes:
+Mount the log & notebook volumes (this step may have to be run at each reboot of the server):
 
 ```sh
 sudo mkdir -p /mnt/k3s/logs

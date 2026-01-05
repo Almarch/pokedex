@@ -28,16 +28,21 @@ class Agent():
         messages = self.body["messages"]
 
         # Get the summary and language of the conversation
+        summary = await summarize(messages)
         (
             summary,
             elements,
             language,
             is_about_pokemon
-        ) = await summarize(messages).values()
+        ) = summary.values()
 
         print("Summary:", summary)
         print("Elements:", elements)
         print("Language:", language)
+        print("Is about Pokémon:", is_about_pokemon)
+        
+        if not is_about_pokemon:
+            return(sorry("not_about_pokemon"))
 
         if language == "other":
             return(sorry("other_language"))
@@ -46,7 +51,7 @@ class Agent():
         conversation = "\n".join([
                 msg["content"] for msg in messages
         ])
-        mentioned_pokemons = regex_search(conversation, language)
+        mentioned_pokemons = await regex_search(conversation, language)
 
         print("Pokémons identified with regex:", mentioned_pokemons)
 
@@ -56,26 +61,21 @@ class Agent():
                 messages,
             )
 
-        if len(mentioned_pokemons) > 0:
-            is_about_pokemon = True
-
-        print("Is about Pokémon:", is_about_pokemon)
         print("Truly mentioned Pokémons:", mentioned_pokemons)
-
-        if not is_about_pokemon:
-            return(sorry("not_about_pokemon"))
         
         # Retrieve relevant documents
         reps = []
         elements.extend([summary])
         for q in elements:
-            reps.extend(await vector_search(q, language))
+            info = await vector_search(q, language)
+            reps.extend(info)
         dv = pd.DataFrame(reps)
         dv["source"] = "vector"
 
         # doc formationg
         if len(mentioned_pokemons) > 0:
-            dn = pd.DataFrame(await name_search(mentioned_pokemons, language))
+            info = await name_search(mentioned_pokemons, language)
+            dn = pd.DataFrame(info)
             dn["source"] = "regex"
             docs = pd.concat([dv, dn], ignore_index=True)
         else:

@@ -15,12 +15,11 @@ async def pull() -> None:
                 json= {
                     "name": model,
                 },
-                stream=False
             )
 
 async def generate(
         prompt: str,
-        format: type,
+        format: type = None,
         temperature: float = 0,
         model: str = config["ollama"]["llm"],
     ) -> str:
