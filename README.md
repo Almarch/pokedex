@@ -5,30 +5,60 @@ The goal of this application is to provide an AI assistant to the world of Poké
 
 It consists in a stack of services orchestrated by Kubernetes. In a nutshell, it encompasses an UI and an inference service. A middleware intercepts the requests between these services, processes them, and augments them with information from a vector DB. The answer is then streamed back to the user.
 
-The project has been set-up such as the European official languages (en, es, fr, de, it) of the game are supported by the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
+The project is designed to run on a gaming computer with a Nvidia GPU. It is compatible with GNU/Linux and Windows WSL. It has been succesfully run on 12Go VRAM + 32Go RAM. It may run with more limited resources with lighter models.
+
+Only the game European languages (🇬🇧, 🇪🇸, 🇫🇷, 🇩🇪, 🇮🇹) are currently supported.
 
 ## 📱 Utilization
 
-Interact with the assistant directly from the web UI:
+Interact with the assistant directly from the web UI. The assistant is designed to cover the 3 following use cases:
 
-<br>
-<div align="center">
-<img width="900" alt="Illustration" src="https://github.com/user-attachments/assets/44947d80-fe17-46c2-b064-514eb24ef8f1" />
-</div>
-<br>
+<details><summary>💡 Find Pokémons given a description</summary>
+</details>
+</br>
 
-As examplified, the app covers 2 use cases:
+<details><summary>💡 Find the description of a given Pokémon</summary>
+</details>
+</br>
 
-- Identify Pokémons from given features.
-- Get the features of Pokémons given their name.
+<details><summary>💡 Cross information and address complex requests</summary>
+</details>
+</br>
 
-## 📋 Specifications
+## 🛠️ Technical documentation
 
-The project is designed to run on a gaming computer with a Nvidia GPU.
+<details><summary>🏗️ Architecture</summary>
+<img width="800" alt="architecture" src="https://github.com/user-attachments/assets/f8c029d1-f62e-422e-9c65-8802418b87e9" />
 
-It is compatible with GNU/Linux and Windows WSL.
+The project is build as a stack of microservices orchestrated by [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The services are:
 
-It has been succesfully run on 12Go VRAM + 32Go RAM. It may run with more limited resources with lighter models.
+- [Ollama](https://github.com/ollama/ollama), the inference provider. It has access to the GPU and runs the language models.
+- [Qdrant](https://github.com/qdrant/qdrant), the vector database. It contains all the information about the Pokémon and it is used to retrieve the relevant documents.
+- [Open-WebUI](https://github.com/open-webui/open-webui), the user interface. It is organized as familiar AI interfaces and organizes the conversations.
+- [Nginx-ingress](https://github.com/kubernetes/ingress-nginx) and [Cert-manager](https://github.com/cert-manager/cert-manager), which respectively root and encrypt the traffic between the user and the server.
+- [Jupyter notebook](https://github.com/jupyter/notebook), which is needed to fill the vector database, and that may also be used for development purposes.
+- The [custom agent](/agent/agent/Agent.py), which processes the user requests and augments the responses with retrieved information.
+
+The agent is represented by Ditto on the graph, as it is designed to mimic Ollama's API. Open-WebUI interacts with the agent as if it were an Ollama service.
+
+Most services need a volume, indicated by a cylinder on the graph. The jupyter notebook and the agent volumes are mapped to `pokedex/notebook/` and `pojedex/logs` respectively, so that the content of these volumes can easily be accessed.
+
+If a fixed IP address is available, the project can be readily exposed to the Internet. If not, a VPS tunnel may be envisaged.
+</details>
+</br>
+
+<details><summary>🎢 Pipeline</summary>
+<img width="800" alt="pipeline" src="https://github.com/user-attachments/assets/dae7af5c-c9d2-4210-9501-150cd15316f9" />
+
+The user interacts with Open-WebUI, which organizes the conversations and is normally plugged to an inference service such as Ollama. However, the service Open-WebUI is actually plugged to the agent, acting as a middleware between the UI and Ollama. At each request from the user, the agent retrieve information from the Qdrant database by 2 means:
+
+- It looks for exact mention of Pokémon names using a regex, and then retrieve information from these Pokémons.
+- It decomposes the user query into elementary sub-queries, and retrieve information using a vector search.
+
+All collected documents are then re-ranked in order to address the user request, and an instruction set is sent to Ollama. This last generation is streamed back to the user.
+
+</details>
+</br>
 
 ## 🚀 Launch the project
 
@@ -39,10 +69,10 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
-
 </br>
 <details><summary>🐋 Nvidia container toolkit installation</summary>
+
+The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
 
 ```sh
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -232,33 +262,19 @@ k9s
 </details>
 </br>
 
-## 🦙 Collect Ollama models
+### 🦙 Ollama models
 
-An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
+All models are automatically pulled at start, which may take some time the first time. The inference is realised by 3 models:
 
-```sh
-kubectl get pods
-```
-
-Pull the models from the agent pod:
-
-```sh
-kubectl exec -it <pod-name> -- python -c "from agent.ollama import pull; pull()"
-```
-
-The inference is realised by 3 models:
-
-- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for quantization, and is fast enough on 12 Go VRAM.
+- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for q8 quantization, and is fast enough on 12 Go VRAM.
 - [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
 - [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
 
 Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 
-## 🧩 Fill the Vector DB
+### 🧩 Fill the Vector DB
 
-A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
-
-It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebook) service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
+The vector DB must be filled using the jupyter-notebook service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
 
 To access the notebook, forward the port to localhost:
 
@@ -268,21 +284,9 @@ kubectl port-forward svc/notebook 8888:8888
 
 The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
-<br>
-<div align="center">
-<img src="notebook/pca.png" width="800" alt="PCA">
-</div>
-<br>
+### 🎮 Access the WebUI
 
-On this figure, we can have a glance at how a few of the Pokémon records have been ordered on a 2D plane from the embedding space of the English collection.
-
-## 🎮 Access the WebUI
-
-[Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
-
-Reach https://localhost and parameterize the interface. Deactivate the user access to the encoder model, and make the LLM accessible to all users.
-
-If needed, set up accounts to the family & friends you would like to share the app with.
+Reach https://localhost and parameterize the interface. Deactivate the user access to the encoder model, and make the LLM accessible to all users. If needed, set up accounts to the family & friends you would like to share the app with.
 
 <details><summary>🕳️ Tunneling</summary>
 
@@ -362,13 +366,6 @@ ssh -p 2222 userA@11.22.33.44
 ```
 
 </details>
-
-## 🔀 Adaptation to other projects
-
-This framework can readily adapt to other RAG/agentic projects.
-
-- The data base should be filled with relevant collections.
-- The custom logic is centralised in `agent/agent/Agent.py`.
 
 ## ⚖️ License
 
