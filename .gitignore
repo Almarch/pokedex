@@ -2,3 +2,4 @@
 k8s/secrets.yaml
 *-checkpoint.*
 logs/*
+notebook/cache

@@ -9,6 +9,7 @@ import uuid
 from typing import Dict, Any, Optional, Union
 from .Agent import Agent
 from .config import config
+from .ollama import pull
 
 # Configure logging
 logging.basicConfig(
@@ -27,6 +28,12 @@ app = FastAPI(title="Ollama Agent Proxy")
 # Initialize HTTP client with infinite timeout for streaming responses
 http_client = httpx.AsyncClient(timeout=None)
 
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Pulling Ollama models...")
+    await pull()
+    logger.info("Models pulled successfully")
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await http_client.aclose()
@@ -36,14 +43,14 @@ def generate_request_id() -> str:
     return f"{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}"
 
 async def log_transaction(
-    request_id: str, 
-    direction: str, 
-    method: str, 
-    path: str, 
-    headers: Dict[str, str], 
-    body: Optional[Union[Dict[str, Any], str, bytes]] = None,
-    status_code: Optional[int] = None
-) -> None:
+        request_id: str, 
+        direction: str, 
+        method: str, 
+        path: str, 
+        headers: Dict[str, str], 
+        body: Optional[Union[Dict[str, Any], str, bytes]] = None,
+        status_code: Optional[int] = None
+    ) -> None:
     """
     Log transaction details to a JSON file.
     
@@ -143,7 +150,7 @@ async def proxy_endpoint(request: Request, path: str):
             )
 
             agent = Agent(body_dict)
-            new_body_dict = agent.process()
+            new_body_dict = await agent.process()
             new_body_str = json.dumps(new_body_dict)
             new_body = new_body_str.encode("utf-8")
 

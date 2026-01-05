@@ -5,28 +5,80 @@ The goal of this application is to provide an AI assistant to the world of Poké
 
 It consists in a stack of services orchestrated by Kubernetes. In a nutshell, it encompasses an UI and an inference service. A middleware intercepts the requests between these services, processes them, and augments them with information from a vector DB. The answer is then streamed back to the user.
 
-The project has been set-up such as English and French are the two supported languages of the assistant. Depending on the request, the assistant uses the appropriate translation of the Pokémon names.
+The project is designed to run on a gaming computer with a Nvidia GPU. It is compatible with GNU/Linux and Windows WSL. It has been succesfully run on 12Go VRAM + 32Go RAM. It may run with more limited resources with lighter models.
+
+Only the game European languages (🇬🇧, 🇪🇸, 🇫🇷, 🇩🇪, 🇮🇹) are currently supported.
+
+All Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 
 ## 📱 Utilization
 
-Interact with the assistant directly from the web UI:
+Interact with the assistant directly from the web UI. The assistant is designed to cover the 3 following use cases:
 
-<br>
-<div align="center">
-<img width="900" alt="Illustration" src="https://github.com/user-attachments/assets/44947d80-fe17-46c2-b064-514eb24ef8f1" />
-</div>
-<br>
+<details><summary>💡 Find Pokémons given a description</summary>
 
-As examplified, the app covers 2 use cases:
+<img width="800" alt="find_pkmn_from_info" src="https://github.com/user-attachments/assets/34bf6d70-c39b-44c1-8a01-b6b754b4a44d" />
 
-- Identify Pokémons from given features.
-- Get the features of Pokémons given their name.
+</details>
+</br>
 
-## 📋 Specifications
+<details><summary>💡 Find the description of a given Pokémon</summary>
 
-The application requires a Nvidia GPU and it is designed for a GNU/Linux server. The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
+<img width="800" alt="find_info_from_pkmn" src="https://github.com/user-attachments/assets/595ddcc9-9693-4048-bbae-e83fb40c56d8" />
 
-It has been succesfully run on 12Go VRAM + 32Go RAM. With more constrained resources, consider using a lighter LLM.
+</details>
+</br>
+
+<details><summary>💡 Cross information and address complex requests</summary>
+
+<img width="800" alt="combine_info" src="https://github.com/user-attachments/assets/50526095-4ba0-4605-a226-c2ee19c8d8aa" />
+
+</details>
+
+## 🛠️ Technical documentation
+
+<details><summary>🏗️ Architecture</summary>
+<img width="800" alt="architecture" src="https://github.com/user-attachments/assets/f8c029d1-f62e-422e-9c65-8802418b87e9" />
+
+The project is build as a stack of microservices orchestrated by [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The services are:
+
+- [Ollama](https://github.com/ollama/ollama), the inference provider. It has access to the GPU and runs the language models.
+- [Qdrant](https://github.com/qdrant/qdrant), the vector database. It contains all the information about the Pokémon and it is used to retrieve the relevant documents.
+- [Open-WebUI](https://github.com/open-webui/open-webui), the user interface. It is organized as familiar AI interfaces and organizes the conversations.
+- [Nginx-ingress](https://github.com/kubernetes/ingress-nginx) and [Cert-manager](https://github.com/cert-manager/cert-manager), which respectively root and encrypt the traffic between the user and the server.
+- [Jupyter notebook](https://github.com/jupyter/notebook), which is needed to fill the vector database, and that may also be used for development purposes.
+- The [custom agent](/agent/agent/Agent.py), which processes the user requests and augments the responses with retrieved information.
+
+The agent is represented by Ditto on the graph, as it is designed to mimic Ollama's API. Open-WebUI interacts with the agent as if it were an Ollama service.
+
+Most services need a volume, indicated by a cylinder on the graph. The jupyter notebook and the agent volumes are mapped to `pokedex/notebook/` and `pojedex/logs` respectively, so that the content of these volumes can easily be accessed.
+
+If a fixed IP address is available, the project can be readily exposed to the Internet. If not, a VPS tunnel may be envisaged.
+</details>
+</br>
+
+<details><summary>🎢 Pipeline</summary>
+<img width="800" alt="pipeline" src="https://github.com/user-attachments/assets/dae7af5c-c9d2-4210-9501-150cd15316f9" />
+
+The user interacts with Open-WebUI, which organizes the conversations and is normally plugged to an inference service such as Ollama. However, the service Open-WebUI is actually plugged to the agent, acting as a middleware between the UI and Ollama. At each request from the user, the agent retrieve information from the Qdrant database by 2 means:
+
+- It looks for exact mention of Pokémon names using a regex, and then retrieve information from these Pokémons.
+- It decomposes the user query into elementary sub-queries, and retrieve information using a vector search.
+
+All collected documents are then re-ranked in order to address the user request, and an instruction set is sent to Ollama. This last generation is streamed back to the user.
+
+</details>
+</br>
+
+<details><summary>🦙 Models</summary>
+The inference is realised by 3 models:
+
+- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for q8 quantization, and is fast enough on 12 Go VRAM.
+- [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
+- [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
+
+Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
+</details>
 
 ## 🚀 Launch the project
 
@@ -37,7 +89,25 @@ git clone https://github.com/almarch/pokedex.git
 cd pokedex
 ```
 
-The project is designed to run with [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes.
+</br>
+<details><summary>🐋 Nvidia container toolkit installation</summary>
+
+The [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) is needed.
+
+```sh
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+sed "s/\$(ARCH)/$(dpkg --print-architecture)/g" | \
+sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+```
+</details>
+</br>
+
+<details><summary>🛞 Set-up Kubernetes</summary>
 
 ```sh
 # install brew
@@ -67,18 +137,6 @@ To load kubectl, k9s & helm:
 
 ```sh
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-```
-
-Generate all secrets:
-
-```sh
-echo "WEBUI_SECRET_KEY=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)" > .env
-
-kubectl create secret generic all-secrets \
-  --from-env-file=.env \
-  --dry-run=client -o yaml > k8s/secrets.yaml
-
-kubectl apply -f k8s/secrets.yaml
 ```
 
 Install ingress and cert-manager:
@@ -116,24 +174,96 @@ kubectl rollout restart daemonset/nvidia-device-plugin-daemonset -n kube-system
 
 kubectl describe node | grep -i nvidia
 ```
+</details>
+</br>
 
-Build the custom images and provide them to k3s:
+<details><summary>🪟 WSL specificities</summary>
 
-```sh
-docker build -t poke-agent:latest -f dockerfile.agent .
-docker build -t poke-notebook:latest -f dockerfile.notebook .
+In `C:/Users/myUser`, create: `.wslconfig` with:
 
-docker save poke-agent:latest | sudo k3s ctr images import -
-docker save poke-notebook:latest | sudo k3s ctr images import -
+```conf
+[wsl2]
+kernelCommandLine = cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1
 ```
 
-Mount the log & notebook volumes:
+Then, from the WSL, in `/etc/wsl.conf`:
+
+```conf
+[boot]
+systemd=true
+command="/etc/startup.sh"
+```
+
+And in `/etc/startup.sh`:
+
+```sh
+#!/bin/bash
+mount --make-rshared /
+
+if [ ! -e /dev/nvidia0 ]; then
+    mkdir -p /dev/nvidia-uvm
+    mknod -m 666 /dev/nvidia0 c 195 0
+    mknod -m 666 /dev/nvidiactl c 195 255
+    mknod -m 666 /dev/nvidia-modeset c 195 254
+    mknod -m 666 /dev/nvidia-uvm c 510 0
+    mknod -m 666 /dev/nvidia-uvm-tools c 510 1
+fi
+```
+
+Make it executable:
+
+```sh
+sudo chmod +x /etc/startup.sh
+```
+
+Restart the WSL. From PowerShell:
+
+```sh
+wsl --shutdown
+bash
+sudo systemctl restart k3s
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+</details>
+</br>
+
+<details><summary>🗺️ App deployment</summary>
+
+To interact with Kubernetes:
+
+```sh
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+```
+
+Generate all secrets:
+
+```sh
+echo "WEBUI_SECRET_KEY=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)" > .env
+
+kubectl create secret generic all-secrets \
+  --from-env-file=.env \
+  --dry-run=client -o yaml > k8s/secrets.yaml
+
+kubectl apply -f k8s/secrets.yaml
+```
+
+Mount the log & notebook volumes (this step may have to be run at each reboot of the server):
 
 ```sh
 sudo mkdir -p /mnt/k3s/logs
 sudo mkdir -p /mnt/k3s/notebook
 sudo mount --bind "$(pwd)/logs" /mnt/k3s/logs
 sudo mount --bind "$(pwd)/notebook" /mnt/k3s/notebook
+```
+
+Build the custom images and provide them to k3s:
+
+```sh
+docker build -t poke-agent:latest -f dockerfiles/dockerfile.agent .
+docker build -t poke-notebook:latest -f dockerfiles/dockerfile.notebook .
+
+docker save poke-agent:latest | sudo k3s ctr images import -
+docker save poke-notebook:latest | sudo k3s ctr images import -
 ```
 
 K3s use docker latest images automatically.
@@ -149,82 +279,35 @@ Check the installation status:
 k9s
 ```
 
-## 🚢 expose the services to localhost
+All models are automatically pulled at start, which may take some time the first time.
 
-The services need to be exposed to localhost either for local use, either to tunnel them to a VPS. For instance, to expose both the notebook, ollama and qdrant:
+The web UI is now available at https://localhost.
+- Deactivate the user access to the embedding and reraking models
+- Make the LLM accessible to all users.
+- Set up accounts to the family & friends you would like to share the app with.
+
+</details>
+</br>
+
+<details><summary>🧩 Fill the Vector DB</summary>
+The vector DB must be filled using the jupyter-notebook service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
+
+To access the notebook, forward the port to localhost:
 
 ```sh
-screen
-
-trap "kill 0" SIGINT
-kubectl port-forward svc/notebook 8888:8888 &
-kubectl port-forward svc/ollama 11434:11434 &
-kubectl port-forward svc/qdrant 6333:6333 &
-wait
+kubectl port-forward svc/notebook 8888:8888
 ```
 
-<!-- kill all port forward
-```sh
-pkill -f "kubectl port-forward"
-```-->
+</details>
+</br>
 
-Then Ctrl+A+D to leave the port-forward screen. The webui should not be port-forwarded as its access is managed by ingress.
-
-## 🦙 Collect Ollama models
-
-An [Ollama](https://github.com/ollama/ollama) inference service is included in the stack.
-
-```sh
-kubectl get pods
-```
-
-Pull the models from an Ollama pod:
-
-```sh
-kubectl exec -it <pod-name> -- ollama pull mistral-nemo:12b-instruct-2407-q4_0
-kubectl exec -it <pod-name> -- ollama pull embeddinggemma:300m
-```
-
-[Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic model that understands instructions and is fast enough on a limited GPU resource. [Gemma](https://huggingface.co/google/embeddinggemma-300m) embedding model is also state-of-the-art multilinguistic model. They can be changed, the `myAgent/myAgent/config.yaml` file must be updated accordingly.
-
-## 🧩 Fill the Vector DB
-
-A [Qdrant](https://github.com/qdrant/qdrant) vector DB is included in the stack.
-
-It must be filled using the [Jupyter Notebook](https://github.com/jupyter/notebook) service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
-
-The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
-
-<br>
-<div align="center">
-<img src="notebook/pca.png" width="800" alt="PCA">
-</div>
-<br>
-
-On this figure, we can have a glance at how a few of the Pokémon records have been ordered on a 2D plane from the embedding space of the French collection.
-
-## 🎮 Access the WebUI
-
-[Open-WebUI](https://github.com/open-webui/open-webui) is included in the stack.
-
-Reach https://localhost and parameterize the interface. Deactivate the user access to the encoder model, and make the LLM accessible to all users.
-
-If needed, set up accounts to the family & friends you would like to share the app with.
-
-## 🔀 Adaptation to other projects
-
-This framework can readily adapt to other RAG/agentic projects.
-
-- The data base should be filled with relevant collections.
-- The custom logic is centralised in `myAgent/myAgent/Agent.py`.
- 
-<!--
-
-## 🕳️ Tunneling
+<details><summary>🕳️ Tunneling</summary>
 
 <img src="https://github.com/user-attachments/assets/86197798-9039-484b-9874-85f529fba932" width="100px" align="right"/>
 
-Say we need to tunnel the server using a VPS. In other terms, we want some services from the GPU server, let's call it A, to be accessible from anywhere, including from machine C. In the middle, B is the VPS used as a tunnel. 
+In the absence of an available fixed IP, it is possible access the application through a VPS tunnel.
+
+In other terms, we want some services from the GPU server, let's call it A, to be accessible from anywhere, including from machine C. In the middle, B is the VPS used as a tunnel. 
 
 Name|A  |B  |C  |
 ---|---|---|---
@@ -297,7 +380,12 @@ And the VPS is a direct tunnel to the gaming machine A:
 ssh -p 2222 userA@11.22.33.44
 ```
 
--->
+</details>
+
+## ⚠️ Disclaimer
+
+The information provided by this Pokédex is for informational purposes only and does not replace professional advice from certified Pokémon experts. Pokémon can be unpredictable and potentially dangerous. Avoid walking in tall grass without proper precautions. If your Pokémon requires specific care, training, or medical attention, please consult the nearest Pokémon Center.
+
 
 ## ⚖️ License
 

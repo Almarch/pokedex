@@ -1,10 +1,5 @@
-requests
+jupyterlab
+ipywidgets
 Pillow
 python-multipart
-pandas
-numpy
-scikit-learn
 matplotlib
-ipywidgets
-pdf2image
-qdrant_client

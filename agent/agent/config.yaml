@@ -1,0 +1,20 @@
+ollama:
+  url: "http://ollama:11434"
+  llm: "mistral-nemo:12b-instruct-2407-q8_0" # 13 GB
+  embedding: "embeddinggemma:300m-bf16" # 621 MB
+  reranking: "llama3.2:3b-instruct-q8_0" # 3.4 GB
+
+qdrant:
+  url: "http://qdrant:6333"
+
+logs:
+  path: "/logs"
+
+languages:
+  supported:
+    - "fr"
+    - "de"
+    - "es"
+    - "it"
+    - "en"
+  default: "en"
