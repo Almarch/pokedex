@@ -9,7 +9,7 @@ class Summary(BaseModel):
     language: Languages | Literal["other"]
     is_about_pokemon: bool
 
-def summarize(
+async def summarize(
     conversation: str | list[dict],
 ) -> Summary:
     
@@ -87,4 +87,5 @@ Determine whether the LAST user message is about Pokémon:
 
 ### OUTPUT
 """
-    return typed_gen(prompt, Summary)
+    response = await typed_gen(prompt, Summary)
+    return response

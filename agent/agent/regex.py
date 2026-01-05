@@ -27,20 +27,21 @@ def fuzzy_match(
             return True
     return False
 
-def regex_search(
+async def regex_search(
         text: str,
         language: Languages = default_language,
     ) -> list[str]:
-    pkmn = qdrant.scroll(
+    pkmn = await qdrant.scroll(
         collection_name = "name_" + language,
         limit=10000,
         with_payload=True,
         with_vectors=False
-    )[0]
+    )
+    pkmn = pkmn[0]
     pkmn = [p for pk in pkmn if fuzzy_match(p := pk.payload["name"], text)]
     return pkmn
 
-def double_check(
+async def double_check(
         words: list[str],
         text: str | list[dict]
     ) -> list[str]:
@@ -87,7 +88,7 @@ Conversation:
 
 ### OUTPUT
 """
-    confirmations = typed_gen(
+    confirmations = await typed_gen(
         prompt,
         Confirmations
     )

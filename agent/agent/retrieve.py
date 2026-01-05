@@ -3,14 +3,14 @@ from .qdrant import qdrant
 from .ollama import embed
 from .config import Languages, default_language
 
-def vector_search(
+async def vector_search(
         query: str, 
         language: Languages = default_language,
         n: int = 5
     ) -> list[dict]:
 
-    query = embed(query)
-    docs = qdrant.query_points(
+    query = await embed(query)
+    docs = await qdrant.query_points(
         collection_name= f"description_{language}",
         query = query,
         limit = n
@@ -18,12 +18,12 @@ def vector_search(
     docs = [{**point.payload, "qdrant_id": point.id} for point in docs.points]
     return docs
 
-def name_search(
-        names,
+async def name_search(
+        names: list[str],
         language: Languages = default_language,
     ) -> list[dict]:
 
-    docs, _ = qdrant.scroll(
+    docs, _ = await qdrant.scroll(
         collection_name=f"description_{language}",
         scroll_filter=Filter(
             should=[

@@ -11,9 +11,6 @@ from .Agent import Agent
 from .config import config
 from .ollama import pull
 
-# pull the model
-pull()
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +27,12 @@ app = FastAPI(title="Ollama Agent Proxy")
 
 # Initialize HTTP client with infinite timeout for streaming responses
 http_client = httpx.AsyncClient(timeout=None)
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Pulling Ollama models...")
+    await pull()
+    logger.info("Models pulled successfully")
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -147,7 +150,7 @@ async def proxy_endpoint(request: Request, path: str):
             )
 
             agent = Agent(body_dict)
-            new_body_dict = agent.process()
+            new_body_dict = await agent.process()
             new_body_str = json.dumps(new_body_dict)
             new_body = new_body_str.encode("utf-8")
 

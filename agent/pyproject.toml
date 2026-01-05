@@ -19,7 +19,6 @@ dependencies = [
     "uvicorn",
     "httpx",
     "python-multipart",
-    "requests",
     "qdrant_client",
     "PyYAML",
     "pydantic",

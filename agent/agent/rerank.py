@@ -3,6 +3,7 @@ from .config import config
 from typing import Literal
 from pydantic import BaseModel
 from pandas import DataFrame
+import asyncio
 
 class Relevance(BaseModel):
     topicality: Literal[0, 1, 2, 3]
@@ -11,15 +12,8 @@ class Relevance(BaseModel):
     usefulness: Literal[0, 1, 2, 3]
     clarity: Literal[0, 1, 2, 3]
 
-def get_scores(
-        query: str,
-        documents: list[str],
-    ) -> list[Relevance]:
-    
-    scores = []
-    for doc in documents:
 
-        prompt = f"""
+prompt_template = """
 ### INSTRUCTIONS
 
 You must assess the relevance of a document to address a given query.
@@ -62,14 +56,20 @@ Do not explain your answer. Output ONLY JSON.
 ### DOCUMENT
 
 {doc}
-"""     
-        score = typed_gen(
-            prompt,
-            Relevance,
-            model = config["ollama"]["reranking"],
-        )
-        scores.append(score)
-    return scores
+"""
+
+async def get_score(doc: str, query: str) -> Relevance:
+    return await typed_gen(
+        prompt_template.format(doc=doc, query = query),
+        Relevance,
+        model=config["ollama"]["reranking"],
+    )
+
+async def get_scores(
+        query: str,
+        documents: list[str],
+    ) -> list[Relevance]:
+    return await asyncio.gather(*(get_score(doc, query) for doc in documents))
 
 def combine_scores(
         scores: DataFrame,
