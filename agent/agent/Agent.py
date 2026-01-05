@@ -1,7 +1,7 @@
 from .instructions import sorry, format_docs
 from .summarize import summarize
 from .retrieve import name_search, vector_search, pokemon_synthese
-from .regex import pokemon_match, double_check
+from .regex import regex_search, double_check
 from .rerank import get_scores, combine_scores, select_docs
 import pandas as pd
 
@@ -46,7 +46,7 @@ class Agent():
         conv = "\n".join([
                 msg["content"] for msg in messages
         ])
-        mentioned_pokemons = pokemon_match(conv, language)
+        mentioned_pokemons = regex_search(conv, language)
 
         print("Pokémons identified with regex:", mentioned_pokemons)
 

@@ -27,7 +27,7 @@ def fuzzy_match(
             return True
     return False
 
-def pokemon_match(
+def regex_search(
         text: str,
         language: Languages = default_language,
     ) -> list[str]:
