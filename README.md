@@ -16,14 +16,23 @@ All Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
 Interact with the assistant directly from the web UI. The assistant is designed to cover the 3 following use cases:
 
 <details><summary>💡 Find Pokémons given a description</summary>
+
+<img width="800" alt="find_pkmn_from_info" src="https://github.com/user-attachments/assets/34bf6d70-c39b-44c1-8a01-b6b754b4a44d" />
+
 </details>
 </br>
 
 <details><summary>💡 Find the description of a given Pokémon</summary>
+
+<img width="800" alt="find_info_from_pkmn" src="https://github.com/user-attachments/assets/595ddcc9-9693-4048-bbae-e83fb40c56d8" />
+
 </details>
 </br>
 
 <details><summary>💡 Cross information and address complex requests</summary>
+
+<img width="800" alt="combine_info" src="https://github.com/user-attachments/assets/50526095-4ba0-4605-a226-c2ee19c8d8aa" />
+
 </details>
 
 ## 🛠️ Technical documentation
