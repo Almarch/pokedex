@@ -1,46 +1,49 @@
-import requests
 from .config import config
 from urllib.parse import urljoin
 import json
+import httpx
 
-def pull() -> None:
-    for model in [
-        config["ollama"]["llm"],
-        config["ollama"]["embedding"],
-        config["ollama"]["reranking"],
-    ]:
-        requests.post(
-            urljoin(config["ollama"]["url"], "api/pull"),
-            json= {
-                "name": model,
-            },
-            stream=False
-        )
+async def pull() -> None:
+    async with httpx.AsyncClient() as client:
+        for model in [
+            config["ollama"]["llm"],
+            config["ollama"]["embedding"],
+            config["ollama"]["reranking"],
+        ]:
+            await client.post(
+                urljoin(config["ollama"]["url"], "api/pull"),
+                json= {
+                    "name": model,
+                },
+                stream=False
+            )
 
-def generate(
+async def generate(
         prompt: str,
         format: type,
         temperature: float = 0,
         model: str = config["ollama"]["llm"],
     ) -> str:
-    response = requests.post(
-        urljoin(config["ollama"]["url"], "api/generate"),
-        json = {
-            "model": model,
-            "prompt": prompt,
-            "format": format,
-            "stream": False,
-            "temperature": temperature,
-        }
-    )
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            urljoin(config["ollama"]["url"], "api/generate"),
+            json = {
+                "model": model,
+                "prompt": prompt,
+                "format": format,
+                "stream": False,
+                "temperature": temperature,
+            },
+            timeout = None,
+        )
     return response.json()["response"]
 
-def typed_gen(
+async def typed_gen(
         prompt: str,
         format: type,
         model: str = None
     ) -> dict:
-    res = generate(
+    res = await generate(
             prompt = prompt,
             format = format.model_json_schema(),
             **({"model": model} if model else {}),
@@ -48,16 +51,17 @@ def typed_gen(
 
     return json.loads(res)
 
-def embed(
+async def embed(
         prompt: str,
     ) -> list[float]:
     
-    response = requests.post(
-        config["ollama"]["url"] + "/api/embeddings",
-        json = {
-            "model": config["ollama"]["embedding"],
-            "prompt": prompt,
-        }
-    )
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            config["ollama"]["url"] + "/api/embeddings",
+            json = {
+                "model": config["ollama"]["embedding"],
+                "prompt": prompt,
+            }
+        )
     return response.json()["embedding"]
 

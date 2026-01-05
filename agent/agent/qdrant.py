@@ -1,4 +1,4 @@
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from .config import config, Languages, default_language
 from .ollama import embed
 from sklearn.metrics.pairwise import cosine_similarity
@@ -6,10 +6,11 @@ from qdrant_client.http import models
 import uuid
 import numpy as np
 from pandas import DataFrame
+import asyncio
 
-qdrant = QdrantClient(url = config["qdrant"]["url"])
+qdrant = AsyncQdrantClient(url = config["qdrant"]["url"])
 
-def fill(
+async def fill(
         names: DataFrame,
         flavors: DataFrame,
         language: Languages = default_language,
@@ -18,16 +19,17 @@ def fill(
     collection_descriptions = f"description_{language}"
     collection_names = f"name_{language}"
     
-    qdrant.delete_collection(collection_name = collection_descriptions)
-    qdrant.delete_collection(collection_name = collection_names)
-    qdrant.create_collection(
+    await qdrant.delete_collection(collection_name = collection_descriptions)
+    await qdrant.delete_collection(collection_name = collection_names)
+    lorem_ipsum = await embed("lorem ipsum")
+    await qdrant.create_collection(
         collection_name = collection_descriptions,
         vectors_config=models.VectorParams(
-            size= len(embed("lorem ipsum")),
+            size= len(lorem_ipsum),
             distance=models.Distance.COSINE
         )
     )
-    qdrant.create_collection(
+    await qdrant.create_collection(
         collection_name = collection_names,
         vectors_config = models.VectorParams(
             size = 1,
@@ -44,7 +46,9 @@ def fill(
         flavor_list = [x.replace("\r", "").replace("\n", " ") for x in flavor_list]
         
         # embeddings
-        vector_list = [embed(x) for x in flavor_list]
+        vector_list = await asyncio.gather(
+            *(embed(x) for x in flavor_list)
+        )
         
         # remove redundant descriptions
         if len(vector_list) == 0:
@@ -88,13 +92,13 @@ def fill(
         ]
     
         # upsert
-        qdrant.upsert(
+        await qdrant.upsert(
             collection_name = collection_descriptions,
             points = points
         )
 
         # also keep the pokemon name
-        qdrant.upsert(
+        await qdrant.upsert(
             collection_name = collection_names,
             points=[models.PointStruct(
                 id=id,
