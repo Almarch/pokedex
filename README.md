@@ -9,6 +9,8 @@ The project is designed to run on a gaming computer with a Nvidia GPU. It is com
 
 Only the game European languages (🇬🇧, 🇪🇸, 🇫🇷, 🇩🇪, 🇮🇹) are currently supported.
 
+All Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
+
 ## 📱 Utilization
 
 Interact with the assistant directly from the web UI. The assistant is designed to cover the 3 following use cases:
@@ -57,6 +59,17 @@ The user interacts with Open-WebUI, which organizes the conversations and is nor
 
 All collected documents are then re-ranked in order to address the user request, and an instruction set is sent to Ollama. This last generation is streamed back to the user.
 
+</details>
+</br>
+
+<details><summary>🦙 Models</summary>
+The inference is realised by 3 models:
+
+- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for q8 quantization, and is fast enough on 12 Go VRAM.
+- [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
+- [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
+
+Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 </details>
 </br>
 
@@ -259,21 +272,17 @@ Check the installation status:
 k9s
 ```
 
+All models are automatically pulled at start, which may take some time the first time.
+
+The web UI is now available at https://localhost.
+- Deactivate the user access to the embedding and reraking models
+- Make the LLM accessible to all users.
+- Set up accounts to the family & friends you would like to share the app with.
+
 </details>
 </br>
 
-### 🦙 Ollama models
-
-All models are automatically pulled at start, which may take some time the first time. The inference is realised by 3 models:
-
-- [Mistral-Nemo](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) is a smart, clean and multilinguistic LLM that understands instructions and tool calling. It is optimized for q8 quantization, and is fast enough on 12 Go VRAM.
-- [Embedding-Gemma](https://huggingface.co/google/embeddinggemma-300m) is a state-of-the-art multilinguistic embedding model. It is used for the vector database indexation & retrieval.
-- [llama3.2-3B](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) is a small and performant model with instruction and multilingual capabilities. It is used for the reranking task.
-
-Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
-
-### 🧩 Fill the Vector DB
-
+<details><summary>🧩 Fill the Vector DB</summary>
 The vector DB must be filled using the jupyter-notebook service, accessible at https://localhost:8888/lab/workspaces/auto-n/tree/pokemons.ipynb.
 
 To access the notebook, forward the port to localhost:
@@ -282,17 +291,16 @@ To access the notebook, forward the port to localhost:
 kubectl port-forward svc/notebook 8888:8888
 ```
 
-The Pokémon data come from [this repo](https://github.com/PokeAPI/pokeapi).
-
-### 🎮 Access the WebUI
-
-Reach https://localhost and parameterize the interface. Deactivate the user access to the embedding and reraking models, and make the LLM accessible to all users. If needed, set up accounts to the family & friends you would like to share the app with.
+</details>
+</br>
 
 <details><summary>🕳️ Tunneling</summary>
 
 <img src="https://github.com/user-attachments/assets/86197798-9039-484b-9874-85f529fba932" width="100px" align="right"/>
 
-Say we need to tunnel the server using a VPS. In other terms, we want some services from the GPU server, let's call it A, to be accessible from anywhere, including from machine C. In the middle, B is the VPS used as a tunnel. 
+In the absence of an available fixed IP, it is possible access the application through a VPS tunnel.
+
+In other terms, we want some services from the GPU server, let's call it A, to be accessible from anywhere, including from machine C. In the middle, B is the VPS used as a tunnel. 
 
 Name|A  |B  |C  |
 ---|---|---|---
@@ -366,6 +374,11 @@ ssh -p 2222 userA@11.22.33.44
 ```
 
 </details>
+
+## ⚠️ Disclaimer
+
+The information provided by this Pokédex is for informational purposes only and does not replace professional advice from certified Pokémon experts. Pokémon can be unpredictable and potentially dangerous. Avoid walking in tall grass without proper precautions. If your Pokémon requires specific care, training, or medical attention, please consult the nearest Pokémon Center.
+
 
 ## ⚖️ License
 
