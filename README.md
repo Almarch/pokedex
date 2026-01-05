@@ -25,7 +25,6 @@ Interact with the assistant directly from the web UI. The assistant is designed 
 
 <details><summary>💡 Cross information and address complex requests</summary>
 </details>
-</br>
 
 ## 🛠️ Technical documentation
 
@@ -71,7 +70,6 @@ The inference is realised by 3 models:
 
 Nemo & Llama are quantized (q8) whereas the embedding model is full-weight. The models can be changed with `agent/agent/config.yaml`.
 </details>
-</br>
 
 ## 🚀 Launch the project
 
