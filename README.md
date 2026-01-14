@@ -38,7 +38,7 @@ Interact with the assistant directly from the web UI. The assistant is designed 
 ## 🛠️ Technical documentation
 
 <details><summary>🏗️ Architecture</summary>
-<img width="800" alt="architecture" src="https://github.com/user-attachments/assets/f8c029d1-f62e-422e-9c65-8802418b87e9" />
+<img width="800" alt="architecture" src="https://github.com/user-attachments/assets/8335de2f-604c-422a-a39f-12f5e760b188" />
 
 The project is build as a stack of microservices orchestrated by [k3s](https://github.com/k3s-io/k3s), a light distribution of kubernetes. The services are:
 
@@ -58,7 +58,7 @@ If a fixed IP address is available, the project can be readily exposed to the In
 </br>
 
 <details><summary>🎢 Pipeline</summary>
-<img width="800" alt="pipeline" src="https://github.com/user-attachments/assets/dae7af5c-c9d2-4210-9501-150cd15316f9" />
+<img width="800" alt="pipeline" src="https://github.com/user-attachments/assets/c494458b-39a9-40b9-ad1e-8a634d88b6be" />
 
 The user interacts with Open-WebUI, which organizes the conversations and is normally plugged to an inference service such as Ollama. However, the service Open-WebUI is actually plugged to the agent, acting as a middleware between the UI and Ollama. At each request from the user, the agent retrieve information from the Qdrant database by 2 means:
 
