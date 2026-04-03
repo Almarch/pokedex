@@ -60,7 +60,8 @@ async def embed(
             json = {
                 "model": config["ollama"]["embedding"],
                 "prompt": prompt,
-            }
+            },
+            timeout = None,
         )
     return response.json()["embedding"]
 
